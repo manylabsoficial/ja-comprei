@@ -8,6 +8,7 @@ import Scanning from './components/Scanning';
 import ShoppingList from './components/ShoppingList';
 import Suggestions from './components/Suggestions';
 import RecipeDetailPage from './pages/RecipeDetailPage';
+import RecipeTestPage from './pages/RecipeTestPage';
 import { api } from './services/api';
 
 // Mock data as fallback for scanning
@@ -37,7 +38,9 @@ export default function App() {
             id: Date.now() + idx, // Unique ID
             name: ing.item,
             quantity: ing.quantidade || '1 uni',
-            checked: false,
+            // Default check ONLY food items (safety filter)
+            checked: !ing.categoria || ing.categoria === 'alimento',
+            categoria: ing.categoria
           }));
           setIngredients(formattedIngredients);
         } else {
@@ -148,6 +151,9 @@ export default function App() {
         } />
 
         <Route path="/receita/:index" element={<RecipeDetailPage />} />
+
+        {/* Rota de Testes (Debug) */}
+        <Route path="/debug/recipes" element={<RecipeTestPage />} />
       </Routes>
     </div>
   );

@@ -36,3 +36,19 @@ This file will contain a list of your project tracks.
 **Objective:** Conectar o Scanner (Frontend) à API de OCR (Backend via Pollinations Vision), permitindo upload de imagens e extração de ingredientes.
 - [ ] [Conexão OCR Scanner](.conductor/tracks/ocr_scanner_connection/plan.md)
 - [ ] [Refatoração Groq Vision](.conductor/tracks/groq_vision_refactor/plan.md)
+
+## refinamento_ia_listas
+**Objective:** Tornar a IA de processamento de listas de compras mais inteligente via prompt engineering: escala dinâmica de receitas, contextualização brasileira sem hardcode, e descrições otimizadas para geração de imagens.
+- [ ] [Refinamento IA Listas](.conductor/tracks/refinamento_ia_listas/plan.md)
+
+## testes_receitas_ui
+**Objective:** Criar página de testes com injeção de dados mockados para bypassar o scanner e agilizar a validação das receitas.
+- [ ] [UI Testes Receitas](.conductor/tracks/testes_receitas_ui/plan.md)
+
+## filtro_inteligente_itens
+**Objective:** Implementar filtragem de itens não-comestíveis em duas camadas (OCR com classificação e Chef com verificação de segurança).
+- [ ] [Filtro Inteligente](.conductor/tracks/filtro_inteligente_itens/plan.md)
+
+## pexels_integration
+**Objective:** Substituir geração de imagens do Pollinations por busca no Pexels para thumbnails de receitas, mantendo código do Pollinations para fallback.
+- [ ] [Integração Pexels](.conductor/tracks/pexels_integration/plan.md)

@@ -21,8 +21,8 @@ class PollinationsService:
         encoded_prompt = quote(prompt)
         
         # Build URL
-        # https://gen.pollinations.ai/image/{prompt}?model=flux&width={w}&height={h}&nologo=true
-        url = f"{self.base_url_gen}/image/{encoded_prompt}?model=flux&width={width}&height={height}&nologo=true"
+        # https://gen.pollinations.ai/image/{prompt}?model={model}&width={w}&height={h}&nologo=true
+        url = f"{self.base_url_gen}/image/{encoded_prompt}?model={settings.POLLINATIONS_MODEL}&width={width}&height={height}&nologo=true"
         
         # Check for seed/enhance if needed, keeping it simple for now standard Plan
         

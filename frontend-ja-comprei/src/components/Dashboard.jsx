@@ -168,6 +168,12 @@ export default function Dashboard({ onNavigate }) {
             {/* Footer */}
             <footer className="py-6 text-center text-xs text-gray-400 dark:text-gray-500">
                 <p>Já Comprei © 2024</p>
+                <button
+                    onClick={() => onNavigate && onNavigate('debug/recipes')}
+                    className="mt-4 text-[10px] opacity-30 hover:opacity-100 transition-opacity uppercase tracking-widest font-bold"
+                >
+                    Modo Teste (Dev)
+                </button>
             </footer>
         </div>
     );

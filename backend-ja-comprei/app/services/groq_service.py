@@ -6,6 +6,78 @@ import json
 settings = get_settings()
 logger = logging.getLogger(__name__)
 
+from app.schemas import ReceitasResponse, VisionResponse
+from pydantic import ValidationError
+
+CHEF_SYSTEM_PROMPT = """
+Você é um Chef Brasileiro Criativo especializado em culinária paulista.
+
+## CONTEXTO CULTURAL BRASILEIRO
+Quando interpretar os ingredientes, aplique conhecimento cultural implícito:
+- "Pão" sem especificação = Pão Francês (padrão brasileiro)
+- "Mortadela", "Presunto", "Peito de Peru" = fatiados (para sanduíches), não peça inteira
+- "Queijo Mussarela" = fatiado ou ralado, conforme contexto da receita
+- "Linguiça" = calabresa defumada (padrão paulista) se não especificado
+- Quantidades de mercado: 1 unidade de cebola = 1 cebola média (~150g)
+- "Arroz" = arroz branco tipo 1 (5kg típico, usa-se 1-2 xícaras por refeição)
+- Temperos básicos assumidos: sal, óleo, alho podem ser usados mesmo se não listados
+- Arredondamento seguro: se a quantidade for ambígua, assuma o padrão para 2 pessoas.
+
+## SEGURANÇA ALIMENTAR (CRÍTICO)
+Antes de gerar qualquer receita, revise rigorosamente a lista de ingredientes:
+1. IDENTIFIQUE itens não comestíveis (ex: sabão, detergente, ração, shampoo, pilhas).
+2. IGNORE-OS completamente. Não inclua em nenhuma receita, nem como decoração.
+3. Se a lista contiver APENAS itens não comestíveis, retorne uma lista de receitas vazia ou uma mensagem educada no nome do prato.
+4. JAMAIS sugerir o consumo de produtos de limpeza ou higiene.
+
+## SENSIBILIDADE CULINÁRIA
+Aplique um equilíbrio inteligente entre praticidade e sofisticação:
+
+### Regra da Receita Especial
+- Para cada conjunto de receitas, inclua PELO MENOS 1 "Receita Destaque":
+  - Mais elaborada, com técnicas ou apresentação diferenciadas
+  - Pode ser um prato "de impressionar" ou uma combinação inusitada
+  - A receita destaque deve surgir NATURALMENTE dos ingredientes fornecidos pelo usuário
+
+### Regra da Praticidade
+- As demais receitas devem ser práticas, do dia-a-dia:
+  - Preparo rápido (15-40 minutos)
+  - Ingredientes simples e acessíveis
+  - Receitas clássicas com pequenas variações
+
+### Detecção de Ingredientes Especiais
+- Analise a lista e identifique se há ingredientes menos comuns ou premium
+- Se houver, use-os preferencialmente na Receita Destaque
+- Se todos os ingredientes forem básicos, crie a Receita Destaque com uma técnica ou combinação criativa
+
+> **IMPORTANTE**: Os exemplos abaixo são meramente ILUSTRATIVOS para você entender o conceito.  
+> NÃO use esses ingredientes específicos a menos que estejam na lista do usuário.
+> 
+> - Exemplo ilustrativo: se o usuário listar "salmão", você poderia sugerir um preparo como "salmão unilateral" como destaque, em vez de apenas "salmão grelhado"
+> - Exemplo ilustrativo: se a lista tiver apenas arroz, feijão e ovo, a receita destaque poderia ser um "arroz de forno gratinado com ovo pochê"
+
+## INSTRUÇÕES
+{dynamic_instructions}
+
+## FORMATO DE SAÍDA
+Retorne um JSON com a chave 'receitas', onde cada receita contém:
+- nome_do_prato: string
+- tempo_preparo: string (ex: "30 minutos")
+- porcoes: número de porções
+- ingredientes_usados: lista de strings com quantidades
+- modo_de_preparo: lista de strings (passos numerados)
+- descricao_imagem: string (ver regras abaixo)
+- tipo_receita: string ("destaque" ou "pratica")
+
+## REGRAS PARA descricao_imagem
+A descrição deve conter APENAS elementos visíveis no prato final:
+1. Liste os ingredientes principais que APARECEM no prato pronto
+2. Descreva a apresentação visual (cores, texturas, disposição)
+3. NÃO inclua ingredientes que foram usados mas não são visíveis (ex: óleo, sal)
+4. NÃO adicione decorações que não estão nos ingredientes (ex: coentro se não tem na receita)
+5. Formato: "[Descrição visual do prato com ingredientes visíveis]. Fotografia profissional de comida, luz natural, estilo gourmet."
+"""
+
 class GroqService:
     def __init__(self):
         self.client = groq.Groq(api_key=settings.GROQ_API_KEY)
@@ -69,7 +141,7 @@ class GroqService:
     def extract_text_vision(self, image_base64: str):
         """
         Uses Groq Vision (Maverick) to extract ingredients directly from an image.
-        Enforces strict JSON output.
+        Classifies items into categories for safety filtering.
         """
         messages = [
             {
@@ -79,9 +151,10 @@ class GroqService:
                         "type": "text", 
                         "text": (
                             "Analise esta imagem de nota fiscal ou lista de compras. "
-                            "Extraia os itens e quantidades. "
-                            "RETORNE APENAS UM JSON PURO. NÃO use Markdown. NÃO use ```json```. NÃO escreva texto introdutório. "
-                            "O formato deve ser exato: {'ingredientes': [{'item': 'nome', 'quantidade': 'qtd'}]}"
+                            "Extraia os itens, quantidades e CLASSIFIQUE cada item. "
+                            "Categorias permitidas: 'alimento', 'limpeza', 'higiene', 'outros'. "
+                            "RETORNE APENAS UM JSON PURO. NÃO use Markdown. "
+                            "Formato: {'ingredientes': [{'item': 'nome', 'quantidade': 'qtd', 'categoria': 'cat'}]}"
                         )
                     },
                     {
@@ -98,13 +171,27 @@ class GroqService:
             response = self.execute_safe(
                 messages,
                 primary_model=settings.MODEL_VISION,
-                json_mode=True # Force JSON mode if supported by the model/API logic
+                json_mode=True 
             )
             
             content = response.choices[0].message.content
             logger.info(f"Groq Vision Raw Output: {content}")
 
-            return self._sanitize_and_parse_json(content)
+            # Sanitização inicial
+            raw_data = self._sanitize_and_parse_json(content)
+            
+            # Validação Pydantic
+            try:
+                validated = VisionResponse.model_validate(raw_data)
+                return validated.model_dump()
+            except ValidationError as e:
+                logger.warning(f"Vision validation failed, returning raw sanitized data: {e}")
+                # Fallback: tentar adicionar categoria default se faltar
+                if 'ingredientes' in raw_data:
+                    for item in raw_data['ingredientes']:
+                        if 'categoria' not in item:
+                            item['categoria'] = 'outros' # Default safe
+                return raw_data
 
         except Exception as e:
             logger.error(f"Groq Vision Error: {e}")
@@ -136,13 +223,41 @@ class GroqService:
         logger.error(f"Failed to parse JSON from content: {content}")
         raise ValueError("Falha ao extrair JSON da resposta do modelo.")
 
-    def generate_recipes(self, ingredients: list[str]):
+    def _calculate_recipe_count(self, ingredients: list[str]) -> tuple[int, str]:
+        """
+        Retorna (num_receitas, contexto) baseado no volume de ingredientes.
+        """
+        count = len(ingredients)
+        
+        if count <= 5:
+            return (2, "compra rápida - foco em praticidade")
+        elif count <= 15:
+            return (4, "compra média - variedade moderada")
+        elif count <= 30:
+            return (8, "compra grande - explore combinações criativas")
+        else:
+            return (12, "compra do mês - cardápio semanal completo")
+
+    def generate_recipes(self, ingredients: list[str]) -> dict:
         """
         Generates creative recipes using the HEAVY model, falling back to FAST if needed.
+        Uses dynamic scaling and Pydantic validation.
         """
+        num_recipes, context = self._calculate_recipe_count(ingredients)
         ingredients_str = ", ".join(ingredients)
+        
+        dynamic_instructions = f"""
+Crie exatamente {num_recipes} receitas para esta {context}.
+Priorize:
+- Diversidade de refeições (café/almoço/jantar/lanche)
+- Aproveitamento máximo dos ingredientes listados
+- Receitas que combinem múltiplos itens da lista
+"""
+        
+        system_prompt = CHEF_SYSTEM_PROMPT.format(dynamic_instructions=dynamic_instructions)
+        
         messages = [
-            {"role": "system", "content": "Você é um Chef Brasileiro Criativo. Crie 3 receitas detalhadas baseadas nos ingredientes fornecidos. Retorne um JSON com a chave 'receitas', onde cada receita tem 'nome_do_prato', 'tempo_preparo', 'ingredientes_usados' (lista), 'modo_de_preparo' (lista de strings, passo a passo) e 'descricao_imagem'. O campo 'descricao_imagem' deve ser uma frase descritiva visual da aparência final do prato para gerar uma foto profissional (ex: 'Prato de macarrão ao molho vermelho vibrante com manjericão fresco e queijo ralado, iluminação natural')."},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Ingredientes: {ingredients_str}"}
         ]
         
@@ -152,6 +267,26 @@ class GroqService:
             fallback_model=settings.MODEL_FAST,
             json_mode=True
         )
-        return json.loads(response.choices[0].message.content)
+        
+        content = response.choices[0].message.content
+        
+        # Tentar parse + validação Pydantic
+        try:
+            validated = ReceitasResponse.model_validate_json(content)
+            return validated.model_dump()
+        except ValidationError as e:
+            logger.warning(f"Pydantic validation failed, attempting sanitization: {e}")
+            # Fallback: sanitização existente
+            try:
+                raw_data = self._sanitize_and_parse_json(content)
+                # Tentar validar o dict sanitizado
+                validated = ReceitasResponse.model_validate(raw_data)
+                return validated.model_dump()
+            except (ValidationError, ValueError) as e2:
+                logger.error(f"Validation failed after sanitization: {e2}")
+                # Retornar raw como último recurso se possível, ou raise
+                if 'raw_data' in locals():
+                    return raw_data
+                raise ValueError("Falha crítica na validação das receitas.")
 
 groq_service = GroqService()

@@ -1,6 +1,9 @@
-import { Search, Clock, ChefHat, User, QrCode, BookOpen, Flame, Leaf } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Clock, ChefHat, User, QrCode, BookOpen, Flame, Leaf, Eye, X } from 'lucide-react';
 
 export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
+    const [selectedPrompt, setSelectedPrompt] = useState(null);
+
     return (
         <div className="relative flex min-h-screen w-full flex-col mx-auto bg-[#FDFBF7] dark:bg-[#171c19] shadow-2xl overflow-hidden font-display antialiased text-[#121614] dark:text-white md:max-w-7xl md:px-0">
             {/* Header */}
@@ -37,6 +40,18 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                                 {/* Overlay Gradient */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
 
+                                {/* Prompt Debug Button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedPrompt(recipe.descricao_imagem || "Prompt indisponível");
+                                    }}
+                                    className="absolute top-4 left-4 p-2 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:bg-black/60 hover:text-white transition-all z-20"
+                                    title="Ver Prompt da Imagem"
+                                >
+                                    <Eye size={16} />
+                                </button>
+
                                 {/* Floating Badge (Example Logic) */}
                                 {recipe.tag && (
                                     <div className="absolute top-4 right-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-[#81B29A] backdrop-blur shadow-sm dark:bg-black/80 dark:text-[#80b294]">
@@ -49,13 +64,13 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                             </div>
 
                             {/* Content */}
-                            < div className="flex flex-col gap-4 p-6" >
+                            <div className="flex flex-col gap-4 p-6">
                                 <h3 className="font-serif text-2xl font-bold leading-tight">
                                     {recipe.title || recipe.nome_do_prato}
                                 </h3>
 
                                 {/* Metadata */}
-                                < div className="flex items-center gap-5 text-sm font-medium text-gray-500 font-sans dark:text-gray-400" >
+                                <div className="flex items-center gap-5 text-sm font-medium text-gray-500 font-sans dark:text-gray-400">
                                     <div className="flex items-center gap-1.5">
                                         <Clock size={20} className="text-[#E07A5F]" />
                                         <span>{recipe.time || recipe.tempo_preparo}</span>
@@ -77,14 +92,13 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                                     </button>
                                 </div>
                             </div>
-                        </article >
-                    ))
-                    }
-                </div >
-            </main >
+                        </article>
+                    ))}
+                </div>
+            </main>
 
             {/* Bottom Navigation */}
-            < nav className="fixed bottom-0 z-50 w-full max-w-md border-t border-[#ebefed] bg-white/95 px-8 pb-8 pt-4 backdrop-blur-xl dark:bg-[#171c19]/95 dark:border-white/5 left-0 right-0 mx-auto md:rounded-t-2xl md:mb-4 md:shadow-2xl md:border-x" >
+            <nav className="fixed bottom-0 z-50 w-full max-w-md border-t border-[#ebefed] bg-white/95 px-8 pb-8 pt-4 backdrop-blur-xl dark:bg-[#171c19]/95 dark:border-white/5 left-0 right-0 mx-auto md:rounded-t-2xl md:mb-4 md:shadow-2xl md:border-x">
                 <div className="flex items-end justify-between">
                     <button onClick={onBack} className="group flex flex-1 flex-col items-center gap-1.5 text-[#677e70] transition-colors hover:text-[#81B29A] dark:text-gray-500">
                         <QrCode size={28} className="transition-transform group-hover:-translate-y-1" />
@@ -104,8 +118,47 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                         <span className="text-[10px] font-bold tracking-wider font-sans uppercase">Perfil</span>
                     </button>
                 </div>
-            </nav >
-        </div >
+            </nav>
+
+            {/* Prompt Debug Modal */}
+            {selectedPrompt && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6 animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-[#232a26] w-full max-w-lg rounded-2xl shadow-2xl p-6 relative flex flex-col gap-4">
+                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-4">
+                            <h3 className="font-serif text-lg font-bold">Image Prompt Debug</h3>
+                            <button
+                                onClick={() => setSelectedPrompt(null)}
+                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-black/30 p-4 rounded-xl border border-dashed border-gray-200 dark:border-white/10">
+                            <p className="font-mono text-xs text-gray-600 dark:text-gray-300 leading-relaxed max-h-[60vh] overflow-y-auto">
+                                {selectedPrompt}
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(selectedPrompt);
+                                    alert('Copiado!');
+                                }}
+                                className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-sage hover:bg-sage/10 rounded-lg"
+                            >
+                                Copiar
+                            </button>
+                            <button
+                                onClick={() => setSelectedPrompt(null)}
+                                className="px-4 py-2 bg-sage text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-oslo-gray transition-colors"
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 

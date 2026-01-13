@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     
     # Novo modelo para Visão/OCR
     MODEL_VISION: str = "meta-llama/llama-4-maverick-17b-128e-instruct" 
+    
+    # Pollinations Model (flux, turbo, etc)
+    POLLINATIONS_MODEL: str = "turbo" 
 
     class Config:
         env_file = ".env"
