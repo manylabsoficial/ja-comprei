@@ -11,7 +11,13 @@ app = FastAPI(title="Já Comprei Backend", version="2.0.0")
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",  # Vite Dev
+        "http://localhost:3000",  # React Default
+        "https://jacomprei.app",  # Production
+        "https://www.jacomprei.app", # WWW Production
+        "https://api.jacomprei.app" # Self (docs)
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
