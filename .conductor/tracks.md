@@ -75,3 +75,4 @@ This file will contain a list of your project tracks.
 - [x] [Página de Perfil](.conductor/tracks/profile_page/plan.md)
 - [x] [Sistema de Créditos](.conductor/tracks/credits_system/plan.md)
 - [x] [Sistema de Slug para Receitas](.conductor/tracks/recipe_slug_system/plan.md)
+- [ ] [Serviço de Email (Brevo)](.conductor/tracks/brevo_email_service/plan.md)

@@ -17,6 +17,16 @@ class Settings(BaseSettings):
     # Pollinations Model (flux, turbo, etc)
     POLLINATIONS_MODEL: str = "turbo" 
 
+    # Supabase Settings
+    SUPABASE_URL: str
+    SUPABASE_KEY: str  # Anon Key (Opcional se formos usar só service role aqui, mas bom ter)
+    SUPABASE_SERVICE_ROLE_KEY: str
+
+    # Brevo Settings
+    BREVO_API_KEY: str
+    BREVO_WELCOME_TEMPLATE_ID: int | None = None
+    BREVO_RESET_TEMPLATE_ID: int | None = None
+
     class Config:
         env_file = ".env"
         extra = "ignore" 

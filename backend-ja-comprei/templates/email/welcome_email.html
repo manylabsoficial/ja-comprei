@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao Já Comprei</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fcefe9;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #4a4a4a;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background-color: #ff6b6b;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 40px 30px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .content p {
+            margin-bottom: 20px;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #ff6b6b;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .emoji {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bem-vindo(a) à sua nova cozinha! 🍳</h1>
+        </div>
+        <div class="content">
+            <p>Olá, <strong>{{params.nome}}</strong>!</p>
+            <p>Ficamos muito felizes em ter você aqui. Os ingredientes já estão na mesa e estamos prontos para te ajudar
+                a transformar suas compras do dia a dia em experiências deliciosas.</p>
+            <p>Só falta um pequeno passo para começarmos. Clique no botão abaixo para confirmar seu cadastro e acessar
+                sua conta.</p>
+
+            <div class="btn-container">
+                <a href="{{params.link}}" class="btn">Confirmar meu cadastro</a>
+            </div>
+
+            <p>Mal podemos esperar para ver o que você vai preparar!</p>
+            <p>Com carinho,<br>Equipe Já Comprei</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 Já Comprei. Todos os direitos reservados.</p>
+            <p>Se você não criou esta conta, pode ignorar este e-mail.</p>
+        </div>
+    </div>
+</body>
+
+</html>

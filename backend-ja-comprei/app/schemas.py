@@ -23,3 +23,11 @@ class ItemVision(BaseModel):
 
 class VisionResponse(BaseModel):
     ingredientes: list[ItemVision]
+
+class UserRegister(BaseModel):
+    email: str
+    password: str
+    nome: str
+
+class PasswordResetRequest(BaseModel):
+    email: str

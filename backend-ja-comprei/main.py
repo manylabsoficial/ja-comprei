@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import voice_router, recipe_router
+from app.routers import voice_router, recipe_router, auth_router
 from dotenv import load_dotenv
 
 # Load env vars
@@ -29,6 +29,9 @@ app.include_router(voice_router.router, prefix="/api")
 
 # Recipes: /api/sugerir-receitas
 app.include_router(recipe_router.router, prefix="/api")
+
+# Auth: /api/auth/register
+app.include_router(auth_router.router, prefix="/api/auth")
 
 @app.get("/")
 def home():
