@@ -41,7 +41,7 @@ export default function ProfilePage() {
         const confirmLogout = window.confirm("Tem certeza que deseja sair?");
         if (confirmLogout) {
             await supabase.auth.signOut();
-            window.location.reload(); // Force reload to clear context/state
+            navigate('/');
         }
     };
 

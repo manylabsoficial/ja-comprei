@@ -1,10 +1,10 @@
 import { Camera, Image as ImageIcon, X } from 'lucide-react';
 
-export default function ScanMethodModal({ isOpen, onClose, onSelectGallery }) {
+export default function ScanMethodModal({ isOpen, onClose, onSelectGallery, onSelectCamera }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 pb-6">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-4 pb-6">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -31,21 +31,18 @@ export default function ScanMethodModal({ isOpen, onClose, onSelectGallery }) {
                 <div className="flex flex-col gap-4 p-6">
 
                     {/* Camera Option (Disabled) */}
+                    {/* Camera Option (Active) */}
                     <button
-                        disabled
-                        className="group relative flex w-full items-center gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-left transition-all dark:border-white/5 dark:bg-white/5 opacity-60 cursor-not-allowed"
+                        onClick={onSelectCamera}
+                        className="group relative flex w-full items-center gap-4 rounded-xl border border-[#2b6cee]/30 bg-[#2b6cee]/10 p-4 text-left transition-all hover:bg-[#2b6cee]/20 active:scale-[0.98] ring-offset-2 focus:ring-2 focus:ring-[#2b6cee]"
                     >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-500 dark:bg-white/10 dark:text-gray-400">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2b6cee] text-white shadow-lg shadow-[#2b6cee]/30 group-hover:scale-110 transition-transform">
                             <Camera size={24} />
                         </div>
                         <div className="flex-1">
                             <h3 className="font-bold text-gray-900 dark:text-white">Escanear Câmera</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Capture sua nota ao vivo</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">Capture sua nota ao vivo</p>
                         </div>
-                        {/* Coming Soon Badge */}
-                        <span className="absolute right-4 top-4 rounded-full bg-[#E07A5F]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#E07A5F]">
-                            Em breve
-                        </span>
                     </button>
 
                     {/* Gallery Option (Active) */}

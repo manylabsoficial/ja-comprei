@@ -1,14 +1,28 @@
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useState, useRef } from 'react';
 import ScanMethodModal from './ScanMethodModal';
+import CameraScanner from './CameraScanner';
 
 export default function Scanner({ onScan, onBack }) {
     const fileInputRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showCamera, setShowCamera] = useState(false);
 
     const handleGalleryClick = () => {
         setIsModalOpen(false);
         fileInputRef.current?.click();
+    };
+
+    const handleCameraClick = () => {
+        setIsModalOpen(false);
+        setShowCamera(true);
+    };
+
+    const handleCameraCapture = (file) => {
+        setShowCamera(false);
+        if (file) {
+            onScan(file);
+        }
     };
 
     const handleFileChange = (e) => {
@@ -66,7 +80,20 @@ export default function Scanner({ onScan, onBack }) {
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onSelectGallery={handleGalleryClick}
+                    onSelectCamera={handleCameraClick}
                 />
+
+                {/* Camera Overlay */}
+                {showCamera && (
+                    <CameraScanner
+                        onCapture={handleCameraCapture}
+                        onClose={() => setShowCamera(false)}
+                        onSelectGallery={() => {
+                            setShowCamera(false);
+                            handleGalleryClick();
+                        }}
+                    />
+                )}
 
             </div>
         </div>

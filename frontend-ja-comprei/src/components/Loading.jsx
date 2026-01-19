@@ -1,4 +1,5 @@
-import { ChefHat, Wind, Receipt } from 'lucide-react';
+import { Wind, Receipt } from 'lucide-react';
+import Logo from '../assets/images/Logo.png';
 
 export default function Loading() {
     return (
@@ -23,9 +24,9 @@ export default function Loading() {
                             <Wind className="text-terracotta opacity-70 animate-steam-3" size={24} />
                         </div>
 
-                        {/* Main Icon with Tilt */}
-                        <div className="animate-tilt text-sage">
-                            <ChefHat size={96} strokeWidth={1} />
+                        {/* Main Logo with Tilt */}
+                        <div className="animate-tilt">
+                            <img src={Logo} alt="Já Comprei Logo" className="w-24 h-24 object-contain" />
                         </div>
                     </div>
                 </div>

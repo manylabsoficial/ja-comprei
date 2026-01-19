@@ -19,6 +19,7 @@ import { useState, useEffect } from 'react';
 import ResponsiveImage from './components/ResponsiveImage';
 import kitchenDesktop from './assets/images/kitchen_desktop.png';
 import kitchenQuadrado from './assets/images/kitchen_quadrado.png';
+import Logo from './assets/images/Logo.png';
 
 export default function LandingPage({ onStart, onLogin }) {
     const [activeStep, setActiveStep] = useState(0);
@@ -48,10 +49,17 @@ export default function LandingPage({ onStart, onLogin }) {
         setTheme(prev => prev === 'dark' ? 'light' : 'dark');
     };
 
+    // Toast state for pricing
+    const [showPricingToast, setShowPricingToast] = useState(false);
+    const handlePricingClick = () => {
+        setShowPricingToast(true);
+        setTimeout(() => setShowPricingToast(false), 3000);
+    };
+
     const navLinks = [
         { label: "Como Funciona", href: "#how-it-works" },
         { label: "Benefícios", href: "#benefits" },
-        { label: "Preços", href: "#pricing" },
+        { label: "Preços", href: "#pricing", isPricing: true },
         { label: "Entrar", href: "#login", isLogin: true },
     ];
 
@@ -59,15 +67,11 @@ export default function LandingPage({ onStart, onLogin }) {
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 font-sans antialiased selection:bg-sage/30 transition-colors duration-300">
             {/* TopAppBar */}
             <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-cream/90 dark:bg-[#171b19]/90 border-b border-gray-100 dark:border-white/10">
-                <div className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto w-full">
-                    <div className="flex items-center gap-2">
-                        <div className="text-sage flex items-center justify-center bg-sage/10 p-2 rounded-full">
-                            <ChefHat size={24} className="fill-current" />
-                        </div>
-                        <h2 className="text-charcoal dark:text-[#FDFBF7] text-xl font-serif font-bold tracking-tight">Já Comprei</h2>
+                <div className="flex items-center justify-between px-6 py-2 max-w-5xl mx-auto w-full">
+                    {/* Logo */}
+                    <div className="flex items-center">
+                        <img src={Logo} alt="Já Comprei" className="w-16 h-16 object-contain" />
                     </div>
-
-                    {/* DEBUG BANNER - REMOVED */}
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center gap-8">
@@ -76,6 +80,14 @@ export default function LandingPage({ onStart, onLogin }) {
                                 <button
                                     key={link.label}
                                     onClick={onLogin}
+                                    className="text-sm font-bold text-charcoal/80 dark:text-gray-300 hover:text-sage dark:hover:text-sage transition-colors"
+                                >
+                                    {link.label}
+                                </button>
+                            ) : link.isPricing ? (
+                                <button
+                                    key={link.label}
+                                    onClick={handlePricingClick}
                                     className="text-sm font-bold text-charcoal/80 dark:text-gray-300 hover:text-sage dark:hover:text-sage transition-colors"
                                 >
                                     {link.label}
@@ -92,6 +104,7 @@ export default function LandingPage({ onStart, onLogin }) {
                         ))}
                     </nav>
 
+                    {/* Right Side Controls */}
                     <div className="flex items-center gap-4">
                         {/* Theme Toggle */}
                         <button
@@ -147,6 +160,17 @@ export default function LandingPage({ onStart, onLogin }) {
                                     >
                                         {link.label}
                                     </button>
+                                ) : link.isPricing ? (
+                                    <button
+                                        key={link.label}
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            handlePricingClick();
+                                        }}
+                                        className="text-lg font-medium text-charcoal dark:text-gray-300 hover:text-sage dark:hover:text-sage transition-colors text-left"
+                                    >
+                                        {link.label}
+                                    </button>
                                 ) : (
                                     <a
                                         key={link.label}
@@ -182,21 +206,21 @@ export default function LandingPage({ onStart, onLogin }) {
                     </div>
 
                     <h1 className="text-charcoal dark:text-[#FDFBF7] text-[2.75rem] leading-[1.1] font-serif font-medium tracking-tight">
-                        Não sabe o que <span className="italic text-sage font-semibold relative inline-block">
-                            cozinhar
+                        Voltou do mercado e não sabe o que <span className="italic text-sage font-semibold relative inline-block">
+                            fazer
                             <svg className="absolute w-full h-2 bottom-1 left-0 text-sage/20 -z-10" preserveAspectRatio="none" viewBox="0 0 100 10">
                                 <path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="8"></path>
                             </svg>
-                        </span> com o que tem na geladeira?
+                        </span> com tudo isso?
                     </h1>
 
                     <p className="text-[#687d73] dark:text-[#97a09c] text-lg font-normal leading-relaxed px-2 lg:px-0">
-                        Transforme sobras em pratos de Chef com Inteligência Artificial em segundos.
+                        Escaneie sua nota fiscal e deixe a IA criar receitas deliciosas com suas compras em segundos.
                     </p>
 
                     <div className="flex flex-col w-full gap-3 pt-2 lg:max-w-xs">
                         <button
-                            onClick={onStart}
+                            onClick={onLogin}
                             className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl h-14 px-6 bg-sage hover:bg-[#6a9480] transition-all shadow-glow hover:shadow-lg text-white text-base font-bold tracking-wide group"
                         >
                             <Sparkles className="group-hover:animate-pulse" size={20} />
@@ -290,7 +314,7 @@ export default function LandingPage({ onStart, onLogin }) {
             </section>
 
             {/* FeatureSection (How it Works) */}
-            <section className="flex flex-col gap-10 px-6 py-16 max-w-5xl mx-auto w-full">
+            <section id="how-it-works" className="flex flex-col gap-10 px-6 py-16 max-w-5xl mx-auto w-full">
                 <div className="text-center">
                     <h2 className="text-charcoal dark:text-[#FDFBF7] font-serif text-3xl font-bold mb-3">Como Funciona</h2>
                     <p className="text-[#687d73] dark:text-[#97a09c]">Três passos simples para parar de desperdiçar.</p>
@@ -341,6 +365,61 @@ export default function LandingPage({ onStart, onLogin }) {
                 </div>
             </section>
 
+            {/* Benefits Section */}
+            <section id="benefits" className="px-6 py-16 max-w-5xl mx-auto w-full">
+                <div className="text-center mb-12">
+                    <h2 className="text-charcoal dark:text-[#FDFBF7] font-serif text-3xl font-bold mb-3">Por que usar o Já Comprei?</h2>
+                    <p className="text-[#687d73] dark:text-[#97a09c]">Benefícios reais que transformam sua rotina.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Benefit 1 */}
+                    <div className="bg-white dark:bg-[#1c221f] rounded-2xl p-6 border border-gray-100 dark:border-white/5 hover:shadow-lg transition-all duration-300">
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-4">
+                            <span className="text-2xl">💸</span>
+                        </div>
+                        <h3 className="text-charcoal dark:text-[#FDFBF7] font-bold text-lg mb-2">Economize até R$450/mês</h3>
+                        <p className="text-[#687d73] dark:text-[#97a09c] text-sm leading-relaxed">Pare de jogar comida fora. Use tudo que você comprou de forma inteligente.</p>
+                    </div>
+
+                    {/* Benefit 2 */}
+                    <div className="bg-white dark:bg-[#1c221f] rounded-2xl p-6 border border-gray-100 dark:border-white/5 hover:shadow-lg transition-all duration-300">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
+                            <span className="text-2xl">⚡</span>
+                        </div>
+                        <h3 className="text-charcoal dark:text-[#FDFBF7] font-bold text-lg mb-2">Receitas em 10 segundos</h3>
+                        <p className="text-[#687d73] dark:text-[#97a09c] text-sm leading-relaxed">Escaneou a nota? Pronto. A IA gera sugestões deliciosas instantaneamente.</p>
+                    </div>
+
+                    {/* Benefit 3 */}
+                    <div className="bg-white dark:bg-[#1c221f] rounded-2xl p-6 border border-gray-100 dark:border-white/5 hover:shadow-lg transition-all duration-300">
+                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-4">
+                            <span className="text-2xl">🧠</span>
+                        </div>
+                        <h3 className="text-charcoal dark:text-[#FDFBF7] font-bold text-lg mb-2">Zero decisão, zero estresse</h3>
+                        <p className="text-[#687d73] dark:text-[#97a09c] text-sm leading-relaxed">Chega de ficar pensando "o que fazer?". A IA decide e você só executa.</p>
+                    </div>
+
+                    {/* Benefit 4 */}
+                    <div className="bg-white dark:bg-[#1c221f] rounded-2xl p-6 border border-gray-100 dark:border-white/5 hover:shadow-lg transition-all duration-300">
+                        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center mb-4">
+                            <span className="text-2xl">📋</span>
+                        </div>
+                        <h3 className="text-charcoal dark:text-[#FDFBF7] font-bold text-lg mb-2">Suas listas organizadas</h3>
+                        <p className="text-[#687d73] dark:text-[#97a09c] text-sm leading-relaxed">Salve ingredientes, receitas favoritas e acesse de qualquer dispositivo.</p>
+                    </div>
+
+                    {/* Benefit 5 */}
+                    <div className="bg-white dark:bg-[#1c221f] rounded-2xl p-6 border border-gray-100 dark:border-white/5 hover:shadow-lg transition-all duration-300">
+                        <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-xl flex items-center justify-center mb-4">
+                            <span className="text-2xl">🌍</span>
+                        </div>
+                        <h3 className="text-charcoal dark:text-[#FDFBF7] font-bold text-lg mb-2">Impacto sustentável</h3>
+                        <p className="text-[#687d73] dark:text-[#97a09c] text-sm leading-relaxed">Cada receita feita com suas compras é menos lixo no planeta. Cozinhe com propósito.</p>
+                    </div>
+                </div>
+            </section>
+
             {/* Appetite Appeal Card */}
             <section className="w-full px-4 pb-16 max-w-5xl mx-auto">
                 <div className="relative overflow-hidden rounded-3xl h-[400px] shadow-lg group">
@@ -377,7 +456,7 @@ export default function LandingPage({ onStart, onLogin }) {
                     <h3 className="text-xl font-bold font-serif mb-2 text-charcoal dark:text-[#FDFBF7]">Pronto para começar?</h3>
                     <p className="text-[#687d73] dark:text-[#97a09c] text-sm mb-6">Junte-se a mais de 10.000 cozinheiros conscientes.</p>
                     <button
-                        onClick={onStart}
+                        onClick={onLogin}
                         className="flex w-full md:w-auto md:mx-auto cursor-pointer items-center justify-center gap-2 rounded-xl h-12 px-6 bg-charcoal hover:bg-black dark:bg-[#FDFBF7] dark:text-charcoal dark:hover:bg-white transition-all text-white text-sm font-bold tracking-wide"
                     >
                         <span>Experimentar Agora</span>
@@ -390,7 +469,7 @@ export default function LandingPage({ onStart, onLogin }) {
             <footer className="mt-auto border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#171b19]">
                 <div className="flex flex-col items-center gap-6 px-5 py-10 text-center max-w-5xl mx-auto">
                     <div className="flex items-center gap-2 opacity-80">
-                        <ChefHat size={20} className="text-sage" />
+                        <img src={Logo} alt="Já Comprei" className="w-6 h-6 object-contain" />
                         <span className="font-serif font-bold text-lg text-charcoal dark:text-[#FDFBF7]">Já Comprei</span>
                     </div>
 
@@ -412,10 +491,17 @@ export default function LandingPage({ onStart, onLogin }) {
                             <span>•</span>
                             <a className="hover:underline" href="#">Privacidade</a>
                         </div>
-                        <p className="text-[#687d73] dark:text-[#97a09c] text-xs font-normal">© 2024 Já Comprei. Todos os direitos reservados.</p>
+                        <p className="text-[#687d73] dark:text-[#97a09c] text-xs font-normal">© 2026 Já Comprei. Todos os direitos reservados.</p>
                     </div>
                 </div>
             </footer>
+
+            {/* Pricing Toast */}
+            {showPricingToast && (
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] bg-charcoal dark:bg-white text-white dark:text-charcoal px-6 py-3 rounded-xl shadow-xl font-bold text-sm animate-in slide-in-from-bottom duration-300">
+                    ✨ Planos serão disponibilizados em breve!
+                </div>
+            )}
         </div>
     );
 }

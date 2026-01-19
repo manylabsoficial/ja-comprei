@@ -76,3 +76,20 @@ This file will contain a list of your project tracks.
 - [x] [Sistema de Créditos](.conductor/tracks/credits_system/plan.md)
 - [x] [Sistema de Slug para Receitas](.conductor/tracks/recipe_slug_system/plan.md)
 - [ ] [Serviço de Email (Brevo)](.conductor/tracks/brevo_email_service/plan.md)
+- [ ] [Entrada Manual de Itens](.conductor/tracks/manual_entry/plan.md)
+
+## camera_scanner
+**Objective:** Implementar leitura de notas fiscais em tempo real com a câmera do dispositivo, integrando com backend OCR existente (Groq Vision).
+- [x] [Scanner com Câmera](.conductor/tracks/camera_scanner/plan.md)
+
+## route_protection
+**Objective:** Implementar proteção de rotas para garantir que áreas autenticadas (dashboard, perfil, listas) sejam inacessíveis sem login.
+- [x] [Proteção de Rotas](.conductor/tracks/route_protection/plan.md)
+
+## cache_stability
+**Objective:** Garantir que o usuário sempre use a versão mais recente do site e que a sessão seja validada ativamente contra o backend, evitando bypasses de login e cache antigo.
+- [ ] [Cache e Estabilidade](.conductor/tracks/cache_stability/plan.md)
+
+## debug_scanner
+**Objective:** Diagnosticar e resolver o erro 404 no endpoint do scanner de notas, adicionando logs robustos no backend e frontend.
+- [ ] [Diagnóstico de Erros no Scanner](.conductor/tracks/debug_scanner/plan.md)

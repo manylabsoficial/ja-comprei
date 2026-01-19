@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useRecipes } from './context/RecipeContext';
 import LandingPage from './LandingPage';
+import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 import Dashboard from './components/Dashboard';
 import Scanner from './components/Scanner';
 import Analyzing from './components/Analyzing';
@@ -14,6 +16,9 @@ import SavedListDetailsPage from './pages/SavedListDetailsPage';
 import ProfilePage from './pages/ProfilePage';
 import SavedRecipeDetailPage from './pages/SavedRecipeDetailPage';
 import RecipeTestPage from './pages/RecipeTestPage';
+import LoginPage from './pages/LoginPage';
+import ConfirmationPage from './pages/ConfirmationPage';
+import ManualEntryPage from './pages/ManualEntryPage';
 import { api } from './services/api';
 import { checkCredits, deductCredit } from './services/recipeService';
 import AppLayout from './components/AppLayout';
@@ -30,6 +35,22 @@ const mockIngredients = [
 export default function App() {
   const navigate = useNavigate();
   const { recipes, setRecipes, ingredients, setIngredients, user } = useRecipes();
+
+  // Handle version/build check to clear cache on new deployments
+  useEffect(() => {
+    const currentBuildId = import.meta.env.VITE_BUILD_ID;
+    const savedBuildId = localStorage.getItem('app_build_id');
+
+    if (savedBuildId && savedBuildId !== currentBuildId) {
+      console.log('Nova versão detectada. Limpando cache e recarregando...');
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('app_build_id', currentBuildId);
+      window.location.reload();
+    } else if (!savedBuildId) {
+      localStorage.setItem('app_build_id', currentBuildId);
+    }
+  }, []);
 
   // Handle scan completion
   const handleScan = async (file) => {
@@ -66,6 +87,24 @@ export default function App() {
     }
   };
 
+  // Handle manual entry
+  const handleManualEntry = (items) => {
+    if (!items || items.length === 0) return;
+
+    // Convert to ingredient objects
+    const newIngredients = items.map((item, idx) => ({
+      id: Date.now() + idx,
+      name: item.name,
+      quantity: item.quantity || '1 un', // Use provided quantity or default
+      unit: 'un', // Generic unit, as quantity field might have it mixed
+      checked: true,
+      categoria: 'alimento' // Assume food by default
+    }));
+
+    setIngredients(newIngredients);
+    navigate('/lista');
+  };
+
   // Handle recipe generation
   const handleGenerate = async (selectedIngredients) => {
     // 1. Check Credits
@@ -91,7 +130,7 @@ export default function App() {
       if (result && result.receitas) {
         const recipesWithImages = result.receitas;
 
-        // Preload images
+        // Preload images with timeout (prevent eternal hanging)
         await Promise.all(recipesWithImages.map(recipe => {
           return new Promise((resolve) => {
             if (!recipe.image_url) {
@@ -102,6 +141,11 @@ export default function App() {
             img.src = recipe.image_url;
             img.onload = resolve;
             img.onerror = resolve;
+
+            // Force resolve after 8 seconds if image is stuck
+            setTimeout(() => {
+              resolve();
+            }, 8000);
           });
         }));
 
@@ -134,7 +178,7 @@ export default function App() {
     navigate(`/receita/${index}`);
   };
 
-  // Handle manual ingredient addition
+  // Handle manual ingredient addition (single item from ShoppingList)
   const handleAddIngredient = (newItem) => {
     setIngredients(prev => [...prev, newItem]);
   };
@@ -146,56 +190,109 @@ export default function App() {
           <Route path="/" element={
             <LandingPage
               onStart={() => navigate('/scanner')}
-              onLogin={() => navigate('/dashboard')}
+              onLogin={() => navigate('/login')}
             />
           } />
 
+          {/* Protected Routes */}
           <Route path="/dashboard" element={
-            <Dashboard onNavigate={(screen) => navigate(`/${screen === 'scanner' ? 'scanner' : screen === 'shopping-list' ? 'lista' : screen}`)} />
+            <ProtectedRoute>
+              <Dashboard onNavigate={(screen) => navigate(`/${screen === 'scanner' ? 'scanner' : screen === 'shopping-list' ? 'lista' : screen}`)} />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/entrada-manual" element={
+            <ProtectedRoute>
+              <ManualEntryPage onConfirm={handleManualEntry} />
+            </ProtectedRoute>
           } />
 
           <Route path="/scanner" element={
-            <Scanner
-              onScan={handleScan}
-              onBack={() => navigate('/dashboard')}
-            />
+            <ProtectedRoute>
+              <Scanner
+                onScan={handleScan}
+                onBack={() => navigate('/dashboard')}
+              />
+            </ProtectedRoute>
           } />
 
-          <Route path="/scanning" element={<Scanning />} />
+          <Route path="/scanning" element={
+            <ProtectedRoute>
+              <Scanning />
+            </ProtectedRoute>
+          } />
 
-          <Route path="/analyzing" element={<Analyzing />} />
+          <Route path="/analyzing" element={
+            <ProtectedRoute>
+              <Analyzing />
+            </ProtectedRoute>
+          } />
 
           <Route path="/lista" element={
-            <ShoppingList
-              ingredients={ingredients}
-              onGenerate={handleGenerate}
-              onAddIngredient={handleAddIngredient}
-              onBack={() => navigate('/scanner')}
-            />
+            <ProtectedRoute>
+              <ShoppingList
+                ingredients={ingredients}
+                onGenerate={handleGenerate}
+                onAddIngredient={handleAddIngredient}
+                onBack={() => navigate('/scanner')}
+              />
+            </ProtectedRoute>
           } />
 
           <Route path="/sugestoes" element={
-            <Suggestions
-              recipes={recipes}
-              onSelectRecipe={handleSelectRecipe}
-              onBack={() => navigate('/lista')}
-            />
+            <ProtectedRoute>
+              <Suggestions
+                recipes={recipes}
+                onSelectRecipe={handleSelectRecipe}
+                onBack={() => navigate('/lista')}
+              />
+            </ProtectedRoute>
           } />
 
-          <Route path="/minhas-receitas" element={<SavedRecipesPage />} />
+          <Route path="/minhas-receitas" element={
+            <ProtectedRoute>
+              <SavedRecipesPage />
+            </ProtectedRoute>
+          } />
 
-          <Route path="/minhas-listas" element={<MyListsPage />} />
-          <Route path="/minhas-listas/:id" element={<SavedListDetailsPage />} />
-          <Route path="/perfil" element={<ProfilePage />} />
+          <Route path="/minhas-listas" element={
+            <ProtectedRoute>
+              <MyListsPage />
+            </ProtectedRoute>
+          } />
 
-          {/* Receita Salva (URL Permanente por Slug) */}
+          <Route path="/minhas-listas/:id" element={
+            <ProtectedRoute>
+              <SavedListDetailsPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/perfil" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
+
+          {/* Public: Shared Recipe */}
           <Route path="/r/:slug" element={<SavedRecipeDetailPage />} />
 
-          {/* Receita Temporária (Por Índice em Memória) */}
-          <Route path="/receita/:index" element={<RecipeDetailPage />} />
+          {/* Protected: Temporary Recipe (Memory) */}
+          <Route path="/receita/:index" element={
+            <ProtectedRoute>
+              <RecipeDetailPage />
+            </ProtectedRoute>
+          } />
 
-          {/* Rota de Testes (Debug) */}
-          <Route path="/debug/recipes" element={<RecipeTestPage />} />
+          {/* Protected: Debug */}
+          <Route path="/debug/recipes" element={
+            <ProtectedRoute>
+              <RecipeTestPage />
+            </ProtectedRoute>
+          } />
+
+          {/* Public: Auth */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/confirmacao" element={<ConfirmationPage />} />
         </Routes>
       </AppLayout>
     </div>

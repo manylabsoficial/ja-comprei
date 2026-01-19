@@ -1,111 +1,102 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../services/supabase';
-import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+// import { motion } from 'framer-motion';
+import Logo from '../assets/images/Logo.png';
 
 export default function ConfirmationPage() {
     const [params] = useSearchParams();
     const navigate = useNavigate();
     const [status, setStatus] = useState('loading'); // loading, success, error
-    const [message, setMessage] = useState('Verificando sua chave mágica...');
+    const [message, setMessage] = useState('Verificando seu email...');
 
     useEffect(() => {
-        const handleConfirmation = async () => {
-            const token_hash = params.get('token_hash');
-            const type = params.get('type');
-            const error = params.get('error');
-            const error_description = params.get('error_description');
+        const verifyEmail = async () => {
+            try {
+                const token_hash = params.get('token_hash');
+                const type = params.get('type');
+                const next = params.get('next') ?? '/dashboard';
 
-            // 1. Check for URL errors (link expired, etc)
-            if (error) {
-                setStatus('error');
-                setMessage(decodeURIComponent(error_description || 'Link inválido ou expirado.'));
-                return;
-            }
-
-            // 2. Validate Token
-            if (token_hash && type) {
-                try {
-                    const { error: verifyError } = await supabase.auth.verifyOtp({
-                        token_hash,
-                        type,
-                    });
-
-                    if (verifyError) {
-                        throw verifyError;
-                    }
-
-                    setStatus('success');
-                    setMessage('Tudo certo! Sua cozinha está pronta.');
-
-                    // Redirect after short delay
-                    setTimeout(() => {
-                        navigate('/perfil');
-                    }, 2000);
-
-                } catch (err) {
-                    console.error("Confirmation Error:", err);
+                if (!token_hash || !type) {
                     setStatus('error');
-                    setMessage('Opa! Esse link parece antigo ou inválido. Tente solicitar um novo.');
+                    setMessage('Link de confirmação inválido.');
+                    return;
                 }
-            } else {
-                // Fallback for implicit grant or weird states
+
+                const { error } = await supabase.auth.verifyOtp({
+                    token_hash,
+                    type,
+                });
+
+                if (error) throw error;
+
+                setStatus('success');
+                setMessage('Email confirmado com sucesso!');
+
+                // Redirect after small delay
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
+
+            } catch (error) {
+                console.error('Confirmation error:', error);
                 setStatus('error');
-                setMessage('Link inválido. Verifique se copiou a URL inteira.');
+                setMessage('Erro ao confirmar email. O link pode ter expirado.');
             }
         };
 
-        handleConfirmation();
+        verifyEmail();
     }, [params, navigate]);
 
     return (
         <div className="min-h-screen bg-cream flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6">
+            <div
+                className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6 animate-in slide-in-from-bottom duration-500"
+            >
+                {/* Logo */}
+                <div className="flex justify-center mb-6">
+                    <img src={Logo} alt="Já Comprei" className="w-20 h-20 object-contain" />
+                </div>
 
                 {/* Loading State */}
                 {status === 'loading' && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-col items-center"
-                    >
-                        <div className="w-16 h-16 border-4 border-sage border-t-terracotta rounded-full animate-spin mb-4"></div>
-                        <h2 className="text-2xl font-serif text-charcoal font-bold">Quase lá...</h2>
-                        <p className="text-muted-foreground">{message}</p>
-                    </motion.div>
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 border-4 border-sage border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-charcoal font-medium animate-pulse">{message}</p>
+                    </div>
                 )}
 
                 {/* Success State */}
                 {status === 'success' && (
-                    <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="flex flex-col items-center"
+                    <div
+                        className="flex flex-col items-center animate-in zoom-in duration-300"
                     >
-                        <div className="text-6xl mb-4">✨</div>
-                        <h2 className="text-2xl font-serif text-sage font-bold">Sucesso!</h2>
-                        <p className="text-charcoal">{message}</p>
-                        <p className="text-sm text-muted-foreground mt-4">Redirecionando...</p>
-                    </motion.div>
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600 text-3xl">
+                            ✓
+                        </div>
+                        <h2 className="text-2xl font-serif font-bold text-charcoal mb-2">Sucesso!</h2>
+                        <p className="text-muted-foreground">{message}</p>
+                        <p className="text-sm text-sage mt-4">Redirecionando...</p>
+                    </div>
                 )}
 
                 {/* Error State */}
                 {status === 'error' && (
-                    <motion.div
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        className="flex flex-col items-center"
+                    <div
+                        className="flex flex-col items-center animate-in slide-in-from-left duration-300"
                     >
-                        <div className="text-6xl mb-4">😕</div>
-                        <h2 className="text-2xl font-serif text-terracotta font-bold">Algo deu errado</h2>
-                        <p className="text-charcoal mb-6">{message}</p>
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600 text-3xl">
+                            ✕
+                        </div>
+                        <h2 className="text-2xl font-serif font-bold text-charcoal mb-2">Ops!</h2>
+                        <p className="text-red-500">{message}</p>
                         <button
                             onClick={() => navigate('/login')}
-                            className="px-6 py-2 bg-charcoal text-white rounded-full font-bold hover:bg-opacity-90 transition-all"
+                            className="mt-6 px-6 py-2 bg-sage text-white rounded-lg hover:bg-[#6a9480] transition-colors"
                         >
-                            Voltar ao Login
+                            Ir para Login
                         </button>
-                    </motion.div>
+                    </div>
                 )}
             </div>
         </div>

@@ -6,6 +6,10 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+html {
+  scroll-behavior: smooth;
+}
+
 
 @theme {
   --color-cream: #FDFBF7;

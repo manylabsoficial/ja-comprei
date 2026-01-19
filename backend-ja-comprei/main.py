@@ -23,6 +23,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request Logging Middleware
+@app.middleware("http")
+async def log_requests(request, call_next):
+    import time
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = (time.time() - start_time) * 1000
+    print(f"REQUEST: {request.method} {request.url.path} - STATUS: {response.status_code} - TEMPO: {process_time:.2f}ms")
+    return response
+
 # Include Routers
 # Voice: /api/voice/transcribe
 app.include_router(voice_router.router, prefix="/api") 

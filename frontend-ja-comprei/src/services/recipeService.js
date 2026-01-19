@@ -5,10 +5,12 @@ export const ensureDevSession = async () => {
     const { data: { session } } = await supabase.auth.getSession()
 
     if (!session) {
-        // SEGURANÇA: Só permite auto-login em localhost
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            console.warn('DEV MODE: Auto-login desativado fora de localhost.')
-            return null
+        // SEGURANÇA: Só permite auto-login em ambiente de desenvolvimento
+        const isLocahost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+        if (!import.meta.env.DEV || !isLocahost) {
+            // Em produção ou rede externa, retorna null silenciosamente
+            return null;
         }
 
         console.log('DEV MODE: Iniciando auto-login...')

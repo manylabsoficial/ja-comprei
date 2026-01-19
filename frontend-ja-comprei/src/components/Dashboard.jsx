@@ -66,6 +66,15 @@ export default function Dashboard({ onNavigate }) {
             route: 'minhas-listas'
         },
         {
+            id: 'manual-entry',
+            label: 'Entrada Manual',
+            description: 'Digite seus itens rapidamente.',
+            icon: ClipboardList, // Or another icon like Edit/Pen
+            color: 'bg-indigo-500', // Different color
+            bgLight: 'bg-indigo-500/10',
+            route: 'entrada-manual'
+        },
+        {
             id: 'voice',
             label: 'Entrada por Voz',
             description: 'Dite sua lista ou comandos.',
