@@ -29,5 +29,19 @@ class UserRegister(BaseModel):
     password: str
     nome: str
 
+class RecipeMetadata(BaseModel):
+    proteina_principal: Literal["frango", "carne_bovina", "peixe", "porco", "ovos", "vegetariano", "misto"]
+    metodo_cocao: list[str]
+    perfil_sabor: list[str]
+    nivel_dificuldade: Literal["facil", "medio", "dificil"]
+    tempo_estimado_minutos: int = Field(ge=5, le=180)
+    tipo_refeicao: Literal["cafe_manha", "almoco", "jantar", "lanche", "sobremesa"]
+    utensilios_especiais: list[str] = []
+    ingredientes_chave: list[str] = Field(min_length=3, max_length=5)
+    restricoes_detectadas: list[str] | None = None
+    custo_estimado: Literal["baixo", "medio", "alto"]
+    ocasiao: Literal["dia_a_dia", "especial", "festa"]
+    num_ingredientes: int = Field(ge=1)
+
 class PasswordResetRequest(BaseModel):
     email: str

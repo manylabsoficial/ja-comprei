@@ -11,6 +11,7 @@ class IngredienteInput(BaseModel):
 
 class PedidoReceitas(BaseModel):
     ingredientes: list[IngredienteInput]
+    user_id: str | None = None
 
 @router.post("/sugerir-receitas")
 async def sugerir_receitas(pedido: PedidoReceitas):
@@ -18,8 +19,8 @@ async def sugerir_receitas(pedido: PedidoReceitas):
     lista_nomes = [i.item for i in pedido.ingredientes]
     print(f"Gerando receitas para: {lista_nomes}")
     try:
-        # Use Orchestrator to include Images
-        return await ai_orchestrator.generate_recipes_with_images(lista_nomes)
+        # Use Orchestrator to include Images and User Preferences
+        return await ai_orchestrator.generate_recipes_with_images(lista_nomes, user_id=pedido.user_id)
     except Exception as e:
         print(f"Erro ao gerar receitas: {e}")
         raise HTTPException(status_code=500, detail=str(e))

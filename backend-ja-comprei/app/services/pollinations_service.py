@@ -1,76 +1,102 @@
 import logging
+import random
 from urllib.parse import quote
 from app.core.config import get_settings
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
 
+
+# Style variations by meal type — all anchored in "Studio Ghibli style"
+STYLE_VARIATIONS = {
+    "cafe_manha": (
+        "Morning light streaming through window, steam rising from warm food, "
+        "soft golden tones, cozy kitchen atmosphere, Studio Ghibli style"
+    ),
+    "almoco": (
+        "Midday table by the window, vibrant natural daylight, colorful fresh ingredients, "
+        "home-cooked meal presentation, Studio Ghibli style"
+    ),
+    "jantar": (
+        "Evening ambiance, warm candlelight glow, rich comforting shadows, "
+        "steam visible in dim light, intimate dinner setting, Studio Ghibli style"
+    ),
+    "lanche": (
+        "Afternoon sunlight, delicate pastel tones, casual cozy setup, "
+        "hand-drawn texture, soft shadows, Studio Ghibli style"
+    ),
+    "sobremesa": (
+        "Soft dreamy lighting, delicate pastel colors, whimsical presentation, "
+        "glistening textures, magical atmosphere, Studio Ghibli style"
+    ),
+    "default": (
+        "Anime food illustration, hand-drawn 2D art, steaming hot, glossy texture, "
+        "vibrant colors, delicious, cozy atmosphere, Studio Ghibli style"
+    ),
+}
+
+# Negative prompt — specific to Ghibli/anime food art
+NEGATIVE_PROMPT = (
+    "photorealistic, 3d render, CGI, modern anime style, sketch lines, "
+    "chibi, deformed, low resolution, blurry, text, watermark, photo, real, "
+    "plastic, artificial, dark shadows, western cartoon style"
+)
+
+
 class PollinationsService:
     """
     Handles image generation using Pollinations.ai with Studio Ghibli style.
+    Supports meal-type-specific style variations for visual diversity.
     """
-    
+
     def __init__(self):
         self.base_url_gen = "https://gen.pollinations.ai"
-        
-        # Ghibli Style Template
-        self.style_suffix = "Anime food illustration, Studio Ghibli style. Steaming hot, glossy texture, vibrant colors, delicious, hand drawn 2D art, cozy atmosphere."
-        self.negative_prompt = "photorealistic, 3d render, plastic, low resolution, blurry, text, watermark, photo, real"
-        
-    def get_ghibli_url(self, visual_tag: str) -> str:
+
+    def get_ghibli_url(
+        self,
+        visual_tag: str,
+        meal_type: str = "default",
+        aspect: str = "1:1"
+    ) -> str:
         """
         Generates a Pollinations URL for a Studio Ghibli style food illustration.
-        
+
         Args:
-            visual_tag: English description of the dish (e.g. "Steak with fried egg")
-            
+            visual_tag: English description of the dish (e.g., "Steak with fried egg")
+            meal_type: One of "cafe_manha", "almoco", "jantar", "lanche", "sobremesa", "default"
+            aspect: Aspect ratio — "1:1" for cards, "16:9" for hero images
+
         Returns:
-            str: The signed/authenticated URL for the image.
+            str: The authenticated URL for the image.
         """
-        if not settings.POLLINATIONS_API_KEY:
-            logger.error("POLLINATIONS_API_KEY is missing! Image generation will fail.")
-            # We return the URL anyway, but it will likely 403 on client side if API enforces auth
-            # Or we could return a placeholder/error string. 
-            # For now, let's log error and proceed to attempt generation.
-            
-        # Construct Prompt
-        full_prompt = f"{visual_tag}. {self.style_suffix}"
+        style = STYLE_VARIATIONS.get(meal_type, STYLE_VARIATIONS["default"])
+
+        full_prompt = f"{visual_tag}. {style}"
         encoded_prompt = quote(full_prompt)
-        
-        # Build Query Params
+
+        seed = random.randint(1, 999999)
+
         width = 1024
         height = 1024
-        model = "flux" # Explicitly using flux for better consistency
-        nologo = "true"
-        seed = 42 # Optional: fixed seed for consistency if needed, or random. Let's leave random (omit)
-        enhance = "false" # We are already enhancing via prompt
-        
+
         url = f"{self.base_url_gen}/image/{encoded_prompt}"
-        url += f"?model={model}&width={width}&height={height}&nologo={nologo}&enhance={enhance}"
-        
-        # Add Negative Prompt if supported via URL (some engines ignore it in GET, but flux usually respects 'negative' param)
-        # Pollinations documentation often passes negative as param
-        url += f"&negative={quote(self.negative_prompt)}"
-        
-        # Authentication (Critical)
+        url += f"?model={settings.POLLINATIONS_MODEL}"
+        url += f"&width={width}&height={height}"
+        url += f"&nologo=true"
+        url += f"&enhance=true"
+        url += f"&seed={seed}"
+        url += f"&negative={quote(NEGATIVE_PROMPT)}"
+
         if settings.POLLINATIONS_API_KEY:
-            # Append as query param 'key' (assuming standard Pollinations auth pattern)
-            # OR Check documentation: Sometimes it's a header, but for IMG URLs it's usually ?key=... or ?token=...
-            # Based on previous code: url += f"&key={settings.POLLINATIONS_API_KEY}"
-            # Updating to comply to User Request: "Pollinations exige API"
-            pass # Already added below
-            
-        # Add API Key/Token ??
-        # The documentation provided doesn't explicitly state the GET param for key, but previous code used 'key'.
-        # Assuming ?key=... is correct for Pollinations.
-        
-        # Important: Verify if user provided a specific param name reference.
-        # User said: "A Pollinations exige API... Se enviarmos comandos sem o token, não irá funcionar."
-        
-        # Let's use what was in the previous file which worked or was assumed correct.
-        if settings.POLLINATIONS_API_KEY:
-             url += f"&key={settings.POLLINATIONS_API_KEY}"
-        
+            url += f"&key={settings.POLLINATIONS_API_KEY}"
+
+        logger.info(
+            f"Image URL generated: meal_type={meal_type}, aspect={aspect}, "
+            f"seed={seed}, tag='{visual_tag[:60]}...'"
+        )
+
         return url
 
+
+# Singleton instance
 pollinations_service = PollinationsService()

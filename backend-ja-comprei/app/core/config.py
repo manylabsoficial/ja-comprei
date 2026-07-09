@@ -5,17 +5,29 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str
     GEMINI_API_KEY: str | None = None
     POLLINATIONS_API_KEY: str | None = None
+    OPENROUTER_API_KEY: str | None = None
     
     # Model Constants
     MODEL_HEAVY: str = "llama-3.3-70b-versatile"
-    MODEL_FAST: str = "llama-3.1-8b-instant"
+    MODEL_FAST: str = "openai/gpt-oss-20b"
     MODEL_AUDIO: str = "whisper-large-v3-turbo"
     
-    # Novo modelo para Visão/OCR
-    MODEL_VISION: str = "meta-llama/llama-4-maverick-17b-128e-instruct" 
+    # Modelo para Visão/OCR (Llama 4 Scout 17B, multimodal, 750 tps)
+    MODEL_VISION: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     
-    # Pollinations Model (flux, turbo, etc)
-    POLLINATIONS_MODEL: str = "turbo" 
+    # Heavy model fallback (Groq) — used when DeepSeek is unavailable
+    MODEL_HEAVY_FALLBACK: str = "openai/gpt-oss-120b"
+    
+    # DeepSeek Models (alternative provider, better cost/quality)
+    DEEPSEEK_API_KEY: str | None = None
+    DEEPSEEK_MODEL_FLASH: str = "deepseek-v4-flash"
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    
+    # Pollinations Model (flux)
+    POLLINATIONS_MODEL: str = "flux"
+    
+    # OpenRouter Image Model
+    OPENROUTER_IMAGE_MODEL: str = "black-forest-labs/flux-1-schnell"
 
     # Supabase Settings
     SUPABASE_URL: str

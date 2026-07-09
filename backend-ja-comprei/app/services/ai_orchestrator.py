@@ -1,14 +1,13 @@
 import logging
 import json
 from app.services.groq_service import groq_service
-from app.services.pollinations_service import pollinations_service
 
 logger = logging.getLogger(__name__)
 
 class AIOrchestrator:
     """
-    Orchestrates calls between Vision/Image Gen (Pollinations) and Text Logic/Reasoning (Groq).
-    Now supports Pexels as alternative image provider.
+    Orchestrates calls across AI providers (DeepSeek, Groq) and Image Gen (Pollinations).
+    Multi-provider with automatic fallback for resilience.
     """
 
     async def process_receipt_image(self, image_buffer: bytes) -> dict:
@@ -25,8 +24,8 @@ class AIOrchestrator:
             # Assuming bytes come as JPEG or detecting mimetype would be better, but defaulting to jpeg for base64 header
             base64_image = encode_image_to_base64(image_buffer)
 
-            # Step 2: Vision (Groq Maverick)
-            logger.info("Sending image to Groq Vision (Maverick)...")
+            # Step 2: Vision (Groq Scout)
+            logger.info("Sending image to Groq Vision (Scout)...")
             structured_data = groq_service.extract_text_vision(base64_image)
             
             logger.info(f"Groq Extraction Result: {json.dumps(structured_data, ensure_ascii=False)}")
@@ -36,39 +35,27 @@ class AIOrchestrator:
             logger.error(f"Orchestrator Receipt Error: {e}")
             raise e
 
-    async def generate_recipes_with_images(self, ingredients: list[str]) -> dict:
+    async def generate_recipes_with_images(self, ingredients: list[str], user_id: str = None) -> dict:
         """
-        Flow:
-        1. Groq -> Generate recipes JSON (with visual_tag).
-        2. Pollinations -> Generate Ghibli Style Image URL for each recipe.
-        3. Merge -> Return enriched JSON.
+        Runs the LangGraph State Machine to suggest creative recipes with images.
+        Uses Roteador de Imagens Tríplice and self-correction.
         """
         try:
-            # Step 1: Generate Recipes (Groq returns sanitized JSON with 'visual_tag')
-            recipes_data = groq_service.generate_recipes(ingredients) 
-            # Expected format: { "receitas": [ {...}, ... ] }
-
-            if "receitas" in recipes_data:
-                for recipe in recipes_data["receitas"]:
-                    dish_name = recipe.get("nome_do_prato", "Dish")
-                    
-                    # Step 2: Get Visual Tag (Prefer English tags from AI)
-                    visual_tag = recipe.get("visual_tag")
-                    if not visual_tag:
-                         # Fallback if AI failed to generate tag: use dish name + generic elements
-                         # Translate simple terms if possible or just use Portuguese name (Pollinations handles it somewhat)
-                         logger.warning(f"Missing visual_tag for {dish_name}. Using fallback.")
-                         visual_tag = f"{dish_name}, delicious food"
-                    
-                    # Step 3: Get Ghibli URL
-                    image_url = pollinations_service.get_ghibli_url(visual_tag)
-                    
-                    # Step 4: Inject (using 'image_url' standard field)
-                    recipe["image_url"] = image_url
-                    # Large image is the same for AI gen (it's vector/high-res enough usually or same seed)
-                    recipe["image_url_large"] = image_url 
+            from app.services.recipe_graph import recipe_graph
             
-            return recipes_data
+            inputs = {
+                "ingredients": ingredients,
+                "user_id": user_id
+            }
+            
+            logger.info("Orchestrator: Invoking LangGraph Recipe Graph...")
+            result = await recipe_graph.ainvoke(inputs)
+            
+            if not result.get("is_valid"):
+                # AC-04: Raise exception when all models and fallbacks are exhausted
+                raise RuntimeError("Falha crítica ao estruturar receitas com IA. Todos os modelos falharam.")
+                
+            return result["recipes_data"]
 
         except Exception as e:
             logger.error(f"Orchestrator Recipe Error: {e}")

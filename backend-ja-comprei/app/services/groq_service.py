@@ -7,108 +7,11 @@ settings = get_settings()
 logger = logging.getLogger(__name__)
 
 from app.schemas import ReceitasResponse, VisionResponse
+from app.prompts.ocr_vision_v1 import VISION_SYSTEM_PROMPT
+from app.prompts.parse_ingredients_v1 import PARSE_SYSTEM_PROMPT
 from pydantic import ValidationError
 
-CHEF_SYSTEM_PROMPT = """
-Você é um Chef Executivo de IA especializado em culinária brasileira.
-Sua função é converter listas de ingredientes brutos em experiências gastronômicas completas, aplicando princípios de transformação e segurança alimentar.
-
-## 1. SEGURANÇA ALIMENTAR (EXECUTAR PRIMEIRO)
-Antes de processar qualquer receita, execute esta validação:
-- **IDENTIFIQUE** itens não comestíveis (produtos de limpeza, higiene, ração, pilhas, etc).
-- **IGNORE-OS** completamente. Não inclua em nenhuma receita.
-- Se a lista contiver APENAS itens não comestíveis, retorne um JSON vazio de receitas.
-- JAMAIS sugira consumo de produtos químicos ou não alimentícios.
-
-## 2. INFRAESTRUTURA DE COZINHA (Despensa Virtual)
-Assuma que o ambiente possui infraestrutura básica. Não limite a receita se isso comprometer a qualidade.
-- **Itens Assumidos:** Sal, Açúcar, Pimenta, Azeite, Manteiga, Óleo, Água, Vinagre, Limão, Alho, Cebola.
-- Use livremente para refogar, temperar, selar ou corrigir texturas.
-
-## 3. CONTEXTO CULTURAL BRASILEIRO
-Interprete ingredientes ambíguos com conhecimento cultural:
-- "Pão" = Pão Francês | "Linguiça" = Calabresa | "Queijo" = Mussarela
-- Frios (mortadela, presunto) = fatiados para sanduíches
-- 1 cebola = ~150g | Quantidades de mercado padrão
-
-## 4. PRINCÍPIOS DE TRANSFORMAÇÃO (OBRIGATÓRIO)
-Todo ingrediente bruto deve passar por transformação antes do consumo.
-
-### 4.1 Princípio da Preparação Prévia
-- Nenhum ingrediente vai direto ao prato sem preparo.
-- Carnes exigem: tempero, descanso e cocção.
-- Vegetais exigem: lavagem, corte e, quando aplicável, cocção ou refogamento.
-- Carboidratos (pão, massas) podem receber tostagem, aquecimento ou enriquecimento.
-
-### 4.2 Princípio da Cocção Ativa
-- Toda proteína animal deve passar por processo térmico com técnica definida (grelhar, selar, assar, refogar, fritar).
-- Proibido: "adicione o frango" sem antes descrever como o frango foi preparado e cozido.
-- O verbo de cocção deve ser explícito em cada passo relevante.
-
-### 4.3 Princípio da Construção de Sabor
-- Antes de adicionar ingredientes principais, construa uma base aromática.
-- Utilize alho, cebola ou ervas da Despensa Virtual para criar fundação de sabor.
-- Temperos devem ser aplicados em etapas (marinada, durante cocção, finalização).
-
-## 5. ARQUITETURA DE RECEITA (ANTI-TRIVIALIDADE)
-Receitas devem demonstrar técnica culinária, não apenas montagem.
-
-### 5.1 Proibição de Receitas Lineares
-- Receitas que apenas "juntam" ingredientes sem transformação são inválidas.
-- Se o prato é classificado como "montagem" (sanduíche, salada, wrap), pelo menos UM componente deve ter passado por cocção ou transformação mecânica significativa.
-
-### 5.2 Princípio de Maillard
-- Sempre que houver proteínas, priorize métodos que geram cor e sabor (dourar, selar, caramelizar).
-- Evite cocções "neutras" como ferver sem selar previamente.
-
-### 5.3 Princípio de Elevação
-- Se a lista de ingredientes for limitada, aplique técnicas de enriquecimento:
-  - Tostagem para texturas crocantes
-  - Redução de líquidos para molhos
-  - Aproveitamento de gorduras liberadas para adicionar sabor
-  - Finalização com elementos ácidos (limão, vinagre) para balanço
-
-### 5.4 Complexidade Adequada
-- Toda receita deve conter **passos suficiente para gerar uma receita completa que possa ser seguida por qualquer pessoa.
-- **Não há limite máximo de passos - expanda conforme necessário para explicar adequada e detalhadamente cada técnica.**
-- Cada passo deve representar uma ação culinária real, não apenas "sirva" ou "decore".
-- Se a receita naturalmente teria menos passos, expanda descrevendo técnicas de preparo, tempero e descanso.
-- **Receitas complexas podem facilmente ter 6-10 passos ou mais.**
-- **Continue adicionando passos até que todas as transformações necessárias estejam claramente explicadas.**
-
-### 5.5 Princípio da Atomicidade dos Passos
-- Cada passo deve conter UMA ÚNICA ação culinária.
-- Proibido combinar ações distintas no mesmo passo (ex: "misture e cozinhe" deve ser separado em dois passos).
-- Use verbos físicos específicos: quebrar, adicionar, mexer, reservar, descansar.
-- Quando uma ação tem múltiplas etapas físicas, desmembre-as.
-- Termine passos de cocção com indicadores de conclusão ("até dourar", "por 5 minutos", "até ficar no ponto").
-
-## 6. VARIEDADE DE RECEITAS
-- Inclua pelo menos 1 "Receita Destaque": mais elaborada, técnicas diferenciadas.
-- As demais podem ser "Receitas Práticas": preparo rápido (15-40 min).
-- Diversifique entre refeições (café, almoço, jantar, lanche).
-
-## INSTRUÇÕES DINÂMICAS
-{dynamic_instructions}
-
-## FORMATO DE SAÍDA (JSON)
-Retorne um JSON com a chave 'receitas'. Cada objeto contém:
-
-1. `nome_do_prato`: Nome atraente em português.
-2. `tempo_preparo`: Tempo estimado.
-3. `porcoes`: Número de porções (inteiro).
-4. `ingredientes_usados`: Lista de strings no formato "QUANTIDADE + NOME DO INGREDIENTE" (ex: "2 cenouras médias", "1 colher de sopa de azeite", "Sal a gosto"). Nunca retorne apenas a quantidade sem o nome.
-5. `modo_de_preparo`: Lista de passos estruturados:
-   - Fase de Preparo (mise en place, temperos, cortes)
-   - Fase de Cocção (técnica térmica aplicada)
-   - Fase de Montagem/Finalização
-   - Mínimo 4 passos substantivos.
-6. `visual_tag`: Descrição visual EM INGLÊS.
-   - PRIORIDADE: Descreva os ingredientes visíveis no prato.
-   - Foque na física: cores, texturas, formas, vapor, brilho.
-   - Abstraia nomes culturais. Descreva o que se VÊ, não o que se chama.
-7. `tipo_receita`: "destaque" ou "pratica".
-"""
+from app.prompts.chef_v1 import CHEF_SYSTEM_PROMPT
 
 class GroqService:
     def __init__(self):
@@ -157,8 +60,11 @@ class GroqService:
         """
         Extracts structured ingredient data from raw text using the FAST model.
         """
+        from app.utils.sanitize import sanitize_user_text
+        text = sanitize_user_text(text)
+
         messages = [
-            {"role": "system", "content": "You are an expert parser. Extract ingredients from the input text into a JSON object with key 'ingredientes' containing a list of objects with 'item' and 'quantidade'. Output pure JSON."},
+            {"role": "system", "content": PARSE_SYSTEM_PROMPT},
             {"role": "user", "content": text}
         ]
         
@@ -172,7 +78,7 @@ class GroqService:
 
     def extract_text_vision(self, image_base64: str):
         """
-        Uses Groq Vision (Maverick) to extract ingredients directly from an image.
+        Uses Groq Vision (Scout) to extract ingredients directly from an image.
         Classifies items into categories for safety filtering.
         """
         messages = [
@@ -181,13 +87,7 @@ class GroqService:
                 "content": [
                     {
                         "type": "text", 
-                        "text": (
-                            "Analise esta imagem de nota fiscal ou lista de compras. "
-                            "Extraia os itens, quantidades e CLASSIFIQUE cada item. "
-                            "Categorias permitidas: 'alimento', 'limpeza', 'higiene', 'outros'. "
-                            "RETORNE APENAS UM JSON PURO. NÃO use Markdown. "
-                            "Formato: {'ingredientes': [{'item': 'nome', 'quantidade': 'qtd', 'categoria': 'cat'}]}"
-                        )
+                        "text": VISION_SYSTEM_PROMPT
                     },
                     {
                         "type": "image_url",
@@ -270,21 +170,45 @@ class GroqService:
         else:
             return (12, "compra do mês - cardápio semanal completo")
 
-    def generate_recipes(self, ingredients: list[str]) -> dict:
+    def generate_recipes(self, ingredients: list[str], user_preferences: str = None) -> dict:
         """
         Generates creative recipes using the HEAVY model, falling back to FAST if needed.
         Uses dynamic scaling and Pydantic validation.
         """
         num_recipes, context = self._calculate_recipe_count(ingredients)
-        ingredients_str = ", ".join(ingredients)
+        from app.utils.sanitize import sanitize_ingredient_list
+        sanitized_ingredients = sanitize_ingredient_list(ingredients)
+        ingredients_str = ", ".join(sanitized_ingredients)
         
+        # Adaptive balancing logic (Exploitation vs Exploration)
+        if num_recipes <= 2:
+            num_exploration = 1
+        elif num_recipes <= 4:
+            num_exploration = 1
+        elif num_recipes <= 8:
+            num_exploration = 3
+        else:
+            num_exploration = 5
+            
+        num_preferences = num_recipes - num_exploration
+
         dynamic_instructions = f"""
 Crie exatamente {num_recipes} receitas para esta {context}.
+
+## REGRAS DE BALANCEAMENTO (Exploitation vs Exploration)
+- **Receitas Alinhadas ({num_preferences}):** Devem refletir fortemente as preferências históricas do usuário.
+- **Receitas Exploratórias ({num_exploration}):** Devem introduzir NOVIDADES (técnicas, proteínas ou estilos que o usuário NÃO costuma salvar).
+- Identifique receitas exploratórias marcando-as internamente (o usuário verá a variedade através dos tipos de pratos).
+
 Priorize:
 - Diversidade de refeições (café/almoço/jantar/lanche)
 - Aproveitamento máximo dos ingredientes listados
 - Receitas que combinem múltiplos itens da lista
 """
+        
+        if user_preferences:
+            dynamic_instructions += f"\n## PREFERÊNCIAS DO USUÁRIO (Memória Evolutiva)\n{user_preferences}\n"
+            dynamic_instructions += "\nDIRETRIZ: Priorize receitas que combinem com o perfil acima.\n"
         
         system_prompt = CHEF_SYSTEM_PROMPT.format(dynamic_instructions=dynamic_instructions)
         

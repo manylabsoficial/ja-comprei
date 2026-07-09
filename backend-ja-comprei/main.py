@@ -40,6 +40,9 @@ app.include_router(voice_router.router, prefix="/api")
 # Recipes: /api/sugerir-receitas
 app.include_router(recipe_router.router, prefix="/api")
 
+# Metadata: /api/recipes/ metadata
+app.include_router(metadata_router.router, prefix="/api")
+
 # Auth: /api/auth/register
 app.include_router(auth_router.router, prefix="/api/auth")
 
