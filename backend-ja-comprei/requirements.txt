@@ -50,7 +50,7 @@ Markdown==3.7
 msgpack==1.1.2
 multidict==6.7.0
 openai>=1.40.0,<2.0.0
-packaging==25.0
+packaging>=23.2,<25.0
 postgrest==2.25.0
 propcache==0.4.1
 proto-plus==1.26.1
@@ -88,7 +88,7 @@ urllib3==2.5.0
 uvicorn==0.40.0
 websockets==15.0.1
 yarl==1.22.0
-langgraph==0.2.20
-langchain==0.3.3
-langchain-openai==0.2.2
-langchain-groq==0.2.0
+langgraph>=0.2.20
+langchain>=0.3.3
+langchain-openai>=0.2.2
+langchain-groq>=0.2.0
