@@ -41,15 +41,15 @@ export default function SavedRecipeDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center bg-[#FDFBF7] dark:bg-[#171c19]">
-                <Loader2 size={40} className="animate-spin text-[#E07A5F]" />
+            <div className="flex h-screen w-full items-center justify-center bg-cream dark:bg-[#171b19]">
+                <Loader2 size={40} className="animate-spin text-terracotta" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="flex flex-col h-screen w-full items-center justify-center bg-[#FDFBF7] dark:bg-[#171c19] gap-4 px-6">
+            <div className="flex flex-col h-screen w-full items-center justify-center bg-cream dark:bg-[#171b19] gap-4 px-6">
                 <AlertCircle size={48} className="text-red-400" />
                 <p className="text-lg text-gray-600 dark:text-gray-400">{error}</p>
                 <button

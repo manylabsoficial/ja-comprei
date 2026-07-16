@@ -29,29 +29,22 @@ export default function CameraScanner({ onCapture, onClose, onSelectGallery }) {
     const handleCapture = () => {
         if (!videoRef.current || !canvasRef.current) return;
 
-        setIsCapturing(true);
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
 
-        // Flash animation
-        setTimeout(() => {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
+        // Set canvas size to match video resolution
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-            // Set canvas size to match video resolution
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+        // Draw current frame
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // Draw current frame
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert to blob/file
-            canvas.toBlob((blob) => {
-                const file = new File([blob], "scanner_capture.jpg", { type: "image/jpeg" });
-                onCapture(file);
-                setIsCapturing(false);
-            }, 'image/jpeg', 0.95);
-
-        }, 150); // Small delay for flash effect
+        // Convert to blob/file
+        canvas.toBlob((blob) => {
+            const file = new File([blob], "scanner_capture.jpg", { type: "image/jpeg" });
+            onCapture(file);
+        }, 'image/jpeg', 0.95);
     };
 
     if (error) {
@@ -89,9 +82,6 @@ export default function CameraScanner({ onCapture, onClose, onSelectGallery }) {
 
             {/* Hidden Canvas for Capture */}
             <canvas ref={canvasRef} className="hidden" />
-
-            {/* Flash Effect Overlay */}
-            <div className={`absolute inset-0 bg-white pointer-events-none transition-opacity duration-150 ${isCapturing ? 'opacity-80' : 'opacity-0'}`} />
 
             {/* UI Overlay */}
             <div className="relative z-10 flex flex-col h-full justify-between">

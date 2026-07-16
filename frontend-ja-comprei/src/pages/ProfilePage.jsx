@@ -8,7 +8,7 @@ import { getSavedRecipes, getShoppingLists, checkCredits } from '../services/rec
 export default function ProfilePage() {
     const { user } = useRecipes();
     const navigate = useNavigate();
-    const [stats, setStats] = useState({ recipes: 0, lists: 0, credits: 0, isAdmin: false });
+    const [stats, setStats] = useState({ recipes: 0, lists: 0, credits: 0, isPrivileged: false, role: 'user' });
     const [loading, setLoading] = useState(true);
     const [preferencesOpen, setPreferencesOpen] = useState(false);
 
@@ -25,7 +25,8 @@ export default function ProfilePage() {
                         recipes: recipes?.length || 0,
                         lists: lists?.length || 0,
                         credits: creditInfo?.balance || 0,
-                        isAdmin: creditInfo?.isAdmin || false
+                        isPrivileged: creditInfo?.isPrivileged || false,
+                        role: creditInfo?.role || 'user'
                     });
                 } catch (error) {
                     console.error("Error fetching stats:", error);
@@ -40,6 +41,8 @@ export default function ProfilePage() {
     const handleLogout = async () => {
         const confirmLogout = window.confirm("Tem certeza que deseja sair?");
         if (confirmLogout) {
+            // Flag para evitar auto-login em desenvolvimento
+            sessionStorage.setItem('manual_logout', 'true');
             await supabase.auth.signOut();
             navigate('/');
         }
@@ -59,16 +62,24 @@ export default function ProfilePage() {
 
     if (!user) {
         return (
-            <div className="flex h-screen items-center justify-center bg-[#FDFBF7] dark:bg-[#171c19]">
+            <div className="flex h-screen items-center justify-center bg-cream dark:bg-[#171b19]">
                 <p className="text-gray-500">Carregando perfil...</p>
             </div>
         );
     }
 
+    // Role labels mapping
+    const roleLabels = {
+        'dev': 'God Mode',
+        'admin': 'Administrador',
+        'founder': 'Fundador',
+        'user': 'Usuário'
+    };
+
     return (
-        <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#171c19] text-[#121614] dark:text-[#FDFBF7] pb-32">
+        <div className="min-h-screen bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 pb-32">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-[#FDFBF7]/90 dark:bg-[#171c19]/90 backdrop-blur-md px-6 py-5 border-b border-gray-100 dark:border-white/5 md:hidden">
+            <header className="sticky top-0 z-40 bg-cream/90 dark:bg-[#171b19]/90 backdrop-blur-md px-6 py-5 border-b border-gray-100 dark:border-white/5 md:hidden">
                 <h1 className="text-xl font-bold tracking-tight text-center">Meu Perfil</h1>
             </header>
 
@@ -77,7 +88,7 @@ export default function ProfilePage() {
                 {/* Profile Card */}
                 <div className="flex flex-col items-center gap-4 mb-10">
                     <div className="relative">
-                        <div className="flex items-center justify-center w-24 h-24 rounded-full bg-[#E07A5F]/10 dark:bg-[#E07A5F]/20 text-[#E07A5F]">
+                        <div className="flex items-center justify-center w-24 h-24 rounded-full bg-terracotta/10 dark:bg-terracotta/20 text-terracotta">
                             <User size={40} />
                         </div>
                         <div className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-[#232a26] rounded-full shadow-md">
@@ -91,20 +102,27 @@ export default function ProfilePage() {
                     </div>
                     <div className="text-center">
                         <h2 className="text-2xl font-bold font-serif">{user.email?.split('@')[0]}</h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 font-sans">{user.email}</p>
+                        <div className="flex flex-col items-center gap-1">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-sans">{user.email}</p>
+                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-sage/20 text-sage border border-sage/30">
+                                {roleLabels[stats.role] || stats.role}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-10">
-                    <div className="col-span-2 p-6 rounded-2xl bg-gradient-to-br from-[#E07A5F] to-[#d06045] shadow-lg text-white mb-2">
+                    <div className="col-span-2 p-6 rounded-2xl bg-gradient-to-br from-terracotta to-orange-600 shadow-lg text-white mb-2">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium opacity-90">Créditos Disponíveis</span>
                             <User size={18} className="opacity-75" />
                         </div>
                         <div className="flex items-end gap-2">
-                            <span className="text-4xl font-bold">{loading ? '-' : (stats.isAdmin ? '∞' : stats.credits)}</span>
-                            <span className="text-sm mb-1 opacity-90">{stats.isAdmin ? 'God Mode' : 'gerações'}</span>
+                            <span className="text-4xl font-bold">{loading ? '-' : (stats.isPrivileged ? '∞' : stats.credits)}</span>
+                            <span className="text-sm mb-1 opacity-90">
+                                {stats.isPrivileged ? 'Ilimitado' : 'gerações'}
+                            </span>
                         </div>
                     </div>
 

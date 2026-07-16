@@ -10,17 +10,17 @@ export default function Recipes({ recipes, onSelectRecipe, onBack }) {
     });
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col bg-cream text-charcoal font-display antialiased overflow-hidden pb-20">
+        <div className="relative flex min-h-screen w-full flex-col bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 font-display antialiased overflow-hidden pb-20 transition-colors duration-200">
 
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center justify-between bg-cream/90 backdrop-blur-md px-6 py-4">
+            <header className="sticky top-0 z-40 flex items-center justify-between bg-cream/90 dark:bg-[#171b19]/90 backdrop-blur-md px-6 py-4 border-b border-gray-100 dark:border-white/5">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sage/15 text-sage">
                         <ChefHat size={24} className="fill-current" />
                     </div>
-                    <h1 className="text-xl font-bold tracking-tight text-charcoal font-sans">Sugestões do Chef</h1>
+                    <h1 className="text-xl font-bold tracking-tight font-sans">Sugestões do Chef</h1>
                 </div>
-                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-transparent hover:bg-black/5 transition-colors">
+                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <Search size={24} />
                 </button>
             </header>

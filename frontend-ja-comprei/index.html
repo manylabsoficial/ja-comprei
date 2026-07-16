@@ -12,6 +12,14 @@
   <meta http-equiv="Expires" content="0" />
 
   <title>Já Comprei</title>
+  <!-- Decide o tema ANTES da primeira pintura — evita o flash de claro→escuro
+       no carregamento (o useTheme hook só roda depois do React montar). -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('theme') || 'dark';
+      if (t === 'dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
 </head>
 
 <body>

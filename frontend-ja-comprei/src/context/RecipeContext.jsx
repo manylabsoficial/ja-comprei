@@ -31,7 +31,9 @@ export function RecipeProvider({ children }) {
         });
 
         // 3. Dev Mode Auto-login (Only on localhost)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Só faz auto-login se o usuário não tiver clicado em 'Sair' manualmente
+        const manualLogout = sessionStorage.getItem('manual_logout');
+        if (!manualLogout && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
             ensureDevSession().then(u => {
                 if (u && !user) {
                     console.log('Dev Auto-login:', u.email);

@@ -52,9 +52,9 @@ export default function MyListsPage() {
     console.log('MyListsPage Render. Lists:', lists, 'Loading:', loading);
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col mx-auto bg-[#FDFBF7] dark:bg-[#171c19] text-[#121614] dark:text-white font-sans md:max-w-7xl">
+        <div className="relative flex min-h-screen w-full flex-col mx-auto bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 font-sans md:max-w-7xl transition-colors duration-200">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center justify-between bg-[#FDFBF7]/90 backdrop-blur-md px-6 py-4 dark:bg-[#171c19]/95 border-b border-transparent">
+            <header className="sticky top-0 z-40 flex items-center justify-between bg-cream/90 backdrop-blur-md px-6 py-4 dark:bg-[#171b19]/95 border-b border-gray-100 dark:border-white/5">
                 <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <ArrowLeft size={24} />
                 </button>

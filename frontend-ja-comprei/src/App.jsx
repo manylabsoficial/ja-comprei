@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { useRecipes } from './context/RecipeContext';
 import LandingPage from './LandingPage';
+import LandingPageV2 from './LandingPageV2';
+import LandingPageModern from './LandingPageModern';
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 import Dashboard from './components/Dashboard';
 import Scanner from './components/Scanner';
@@ -18,7 +20,9 @@ import SavedRecipeDetailPage from './pages/SavedRecipeDetailPage';
 import RecipeTestPage from './pages/RecipeTestPage';
 import LoginPage from './pages/LoginPage';
 import ConfirmationPage from './pages/ConfirmationPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import ManualEntryPage from './pages/ManualEntryPage';
+import VoiceInputPage from './pages/VoiceInputPage';
 import { api } from './services/api';
 import { checkCredits, deductCredit } from './services/recipeService';
 import AppLayout from './components/AppLayout';
@@ -184,11 +188,33 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-[#102217] text-charcoal dark:text-cream font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 font-sans transition-colors duration-300">
       <AppLayout>
         <Routes>
-          <Route path="/" element={
+          {/* Arquitetura dividida: a landing pública agora é o site estático
+              cinematográfico servido na raiz do domínio (jacomprei.app). Este
+              SPA vive em app.jacomprei.app; a raiz do app só encaminha para o
+              login (que, por sua vez, já manda quem está logado ao /dashboard). */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Landing antiga — DESVINCULADA da raiz, não deletada (mantida como
+              histórico/backup, acessível diretamente por esta rota). */}
+          <Route path="/landing-classic" element={
             <LandingPage
+              onStart={() => navigate('/scanner')}
+              onLogin={() => navigate('/login')}
+            />
+          } />
+
+          <Route path="/index2" element={
+            <LandingPageV2
+              onStart={() => navigate('/scanner')}
+              onLogin={() => navigate('/login')}
+            />
+          } />
+
+          <Route path="/v2" element={
+            <LandingPageModern
               onStart={() => navigate('/scanner')}
               onLogin={() => navigate('/login')}
             />
@@ -204,6 +230,12 @@ export default function App() {
           <Route path="/entrada-manual" element={
             <ProtectedRoute>
               <ManualEntryPage onConfirm={handleManualEntry} />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/entrada-voz" element={
+            <ProtectedRoute>
+              <VoiceInputPage />
             </ProtectedRoute>
           } />
 
@@ -292,6 +324,7 @@ export default function App() {
 
           {/* Public: Auth */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
           <Route path="/confirmacao" element={<ConfirmationPage />} />
         </Routes>
       </AppLayout>

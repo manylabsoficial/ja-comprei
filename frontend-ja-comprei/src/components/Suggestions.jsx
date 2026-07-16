@@ -5,42 +5,49 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
     const [selectedPrompt, setSelectedPrompt] = useState(null);
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col mx-auto bg-[#FDFBF7] dark:bg-[#171c19] shadow-2xl overflow-hidden font-display antialiased text-[#121614] dark:text-white md:max-w-7xl md:px-0">
+        <div className="relative flex min-h-screen w-full flex-col mx-auto bg-surface-base shadow-2xl overflow-hidden font-sans antialiased text-text-primary md:max-w-7xl md:px-0 transition-colors duration-200">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center justify-between bg-[#FDFBF7]/90 backdrop-blur-md px-6 py-4 dark:bg-[#171c19]/95 border-b border-transparent md:rounded-t-3xl md:border-x md:border-t dark:md:border-white/5 md:bg-white dark:md:bg-[#171c19]">
+            <header className="sticky top-0 z-40 flex items-center justify-between bg-surface-base/90 backdrop-blur-md px-6 py-4 border-b border-border-subtle md:rounded-t-3xl md:border-x md:border-t">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#81B29A]/15 text-[#81B29A] dark:bg-[#80b294]/20 dark:text-[#80b294]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-gold-500">
                         <UtensilsIcon size={24} />
                     </div>
                     <h1 className="text-xl font-bold tracking-tight">Sugestões do Chef</h1>
                 </div>
-                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-transparent hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-transparent hover:bg-surface-hover transition-colors">
                     <Search size={24} />
                 </button>
             </header>
 
             {/* Scrollable Content */}
-            <main className="flex-1 overflow-y-auto px-5 pb-28 pt-6 no-scrollbar md:px-8 md:border-x md:border-[#ebefed] dark:md:border-white/5 md:bg-white dark:md:bg-[#1c221f]">
+            <main className="flex-1 overflow-y-auto px-5 pb-28 pt-6 no-scrollbar md:px-8 md:border-x md:border-border-subtle">
                 {/* Context Message */}
                 <div className="px-1 mb-8">
-                    <p className="text-sm font-medium text-[#677e70] font-sans dark:text-gray-400">
+                    <p className="text-sm font-medium text-text-tertiary">
                         Com base no seu recibo/ingredientes, aqui estão {recipes.length} receitas deliciosas que você pode preparar agora.
                     </p>
                 </div>
 
-                <div className="flex flex-col gap-8 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
+                <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
                     {recipes.map((recipe, index) => (
-                        <article key={recipe.id || index} className="group relative flex flex-col overflow-hidden rounded-[2rem] bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:bg-[#232a26]">
-                            {/* Image Container */}
-                            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[2rem]">
-                                <div
-                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                    style={{ backgroundImage: `url('${recipe.image_url || recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}')` }}
-                                ></div>
-                                {/* Overlay Gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60"></div>
+                        <article
+                            key={recipe.id || index}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onSelectRecipe(recipe, index)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectRecipe(recipe, index); }}
+                            className="group relative flex flex-col aspect-[4/5] overflow-hidden rounded-[2rem] shadow-sm transition-all duration-300 hover:shadow-xl cursor-pointer"
+                        >
+                            {/* Imagem grande — a comida ocupa o card inteiro */}
+                            <div
+                                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                                style={{ backgroundImage: `url('${recipe.image_url || recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}')` }}
+                            ></div>
+                            {/* Gradiente escuro subindo — o chrome some, a comida fala */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/30 to-transparent"></div>
 
-                                {/* Prompt Debug Button */}
+                            {/* Prompt Debug Button — apenas em dev */}
+                            {import.meta.env.DEV && (
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -51,45 +58,31 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                                 >
                                     <Eye size={16} />
                                 </button>
+                            )}
 
-                                {/* Floating Badge (Example Logic) */}
-                                {recipe.tag && (
-                                    <div className="absolute top-4 right-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold text-[#81B29A] backdrop-blur shadow-sm dark:bg-black/80 dark:text-[#80b294]">
-                                        <span className="flex items-center gap-1 font-sans">
-                                            {recipe.tag === 'Saudável' ? <Leaf size={14} className="fill-current" /> : <Flame size={14} className="fill-current text-[#E07A5F]" />}
-                                            {recipe.tag}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Badge dourado */}
+                            {recipe.tag && (
+                                <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-gold-500 px-3 py-1.5 text-xs font-bold text-on-gold shadow-sm">
+                                    {recipe.tag === 'Saudável' ? <Leaf size={14} className="fill-current" /> : <Flame size={14} className="fill-current" />}
+                                    {recipe.tag}
+                                </div>
+                            )}
 
-                            {/* Content */}
-                            <div className="flex flex-col gap-4 p-6">
-                                <h3 className="font-serif text-2xl font-bold leading-tight">
+                            {/* Título + meta sobre a foto */}
+                            <div className="relative mt-auto flex flex-col gap-2 p-6 text-text-primary">
+                                <h3 className="text-2xl font-bold leading-tight">
                                     {recipe.title || recipe.nome_do_prato}
                                 </h3>
-
-                                {/* Metadata */}
-                                <div className="flex items-center gap-5 text-sm font-medium text-gray-500 font-sans dark:text-gray-400">
+                                <div className="flex items-center gap-5 text-sm font-medium text-text-secondary">
                                     <div className="flex items-center gap-1.5">
-                                        <Clock size={20} className="text-[#E07A5F]" />
+                                        <Clock size={18} className="text-gold-500" />
                                         <span>{recipe.time || recipe.tempo_preparo}</span>
                                     </div>
-                                    <div className="h-1 w-1 rounded-full bg-gray-300"></div>
+                                    <div className="h-1 w-1 rounded-full bg-text-tertiary"></div>
                                     <div className="flex items-center gap-1.5">
-                                        <ChefIcon size={20} className="text-[#E07A5F]" />
+                                        <ChefIcon size={18} className="text-gold-500" />
                                         <span>{recipe.difficulty || 'Fácil'}</span>
                                     </div>
-                                </div>
-
-                                {/* Action */}
-                                <div className="mt-2 flex items-center justify-end">
-                                    <button
-                                        onClick={() => onSelectRecipe(recipe, index)}
-                                        className="flex w-full items-center justify-center rounded-full bg-[#81B29A] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#81B29A]/30 transition-transform active:scale-95 font-sans hover:bg-[#72a38b]"
-                                    >
-                                        Ver Receita
-                                    </button>
                                 </div>
                             </div>
                         </article>
@@ -97,23 +90,21 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                 </div>
             </main>
 
-
-
-            {/* Prompt Debug Modal */}
+            {/* Prompt Debug Modal — apenas em dev */}
             {selectedPrompt && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-[#232a26] w-full max-w-lg rounded-2xl shadow-2xl p-6 relative flex flex-col gap-4">
-                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-4">
-                            <h3 className="font-serif text-lg font-bold">Image Prompt Debug</h3>
+                    <div className="bg-surface-overlay w-full max-w-lg rounded-2xl shadow-2xl p-6 relative flex flex-col gap-4">
+                        <div className="flex items-center justify-between border-b border-border-subtle pb-4">
+                            <h3 className="text-lg font-bold">Image Prompt Debug</h3>
                             <button
                                 onClick={() => setSelectedPrompt(null)}
-                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
+                                className="p-2 rounded-full hover:bg-surface-hover"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-4 rounded-xl border border-dashed border-gray-200 dark:border-white/10">
-                            <p className="font-mono text-xs text-gray-600 dark:text-gray-300 leading-relaxed max-h-[60vh] overflow-y-auto">
+                        <div className="bg-surface-sunken p-4 rounded-xl border border-dashed border-border-default">
+                            <p className="font-mono text-xs text-text-secondary leading-relaxed max-h-[60vh] overflow-y-auto">
                                 {selectedPrompt}
                             </p>
                         </div>
@@ -123,13 +114,13 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
                                     navigator.clipboard.writeText(selectedPrompt);
                                     alert('Copiado!');
                                 }}
-                                className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-sage hover:bg-sage/10 rounded-lg"
+                                className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-gold-500 hover:bg-gold-500/10 rounded-lg"
                             >
                                 Copiar
                             </button>
                             <button
                                 onClick={() => setSelectedPrompt(null)}
-                                className="px-4 py-2 bg-sage text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-oslo-gray transition-colors"
+                                className="px-4 py-2 bg-gold-500 text-on-gold text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-gold-600 transition-colors"
                             >
                                 Fechar
                             </button>

@@ -5,44 +5,8 @@ export const ensureDevSession = async () => {
     const { data: { session } } = await supabase.auth.getSession()
 
     if (!session) {
-        // SEGURANÇA: Só permite auto-login em ambiente de desenvolvimento
-        const isLocahost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-        if (!import.meta.env.DEV || !isLocahost) {
-            // Em produção ou rede externa, retorna null silenciosamente
-            return null;
-        }
-
-        console.log('DEV MODE: Iniciando auto-login...')
-        // Auto-login hardcoded para desenvolvimento
-        const { error } = await supabase.auth.signInWithPassword({
-            email: 'dev@jacomprei.com',
-            password: 'senha123',
-        })
-
-        if (error) {
-            console.warn('DEV MODE: Login falhou. Tentando criar usuário dev...', error.message)
-
-            // Tenta criar o usuário se não existir
-            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-                email: 'dev@jacomprei.com',
-                password: 'senha123',
-            })
-
-            if (signUpError) {
-                console.error('DEV MODE FATAL: Falha ao criar usuário.', signUpError)
-                return null
-            }
-
-            console.log('DEV MODE: Usuário criado com sucesso!', signUpData)
-
-            // Se o auto-confirm não estiver ativo, o login pode não ocorrer automaticamente.
-            if (!signUpData.session) {
-                alert('DEV MODE: Usuário criado! Verifique seu email para confirmar (se necessário) ou desative "Confirm Email" no Supabase.')
-                return null
-            }
-        }
-        console.log('DEV MODE: Login realizado com sucesso')
+        // Desativado auto-login fake para não poluir o banco central do ManyLabs
+        return null;
     }
 
     // Retorna o usuário atual
@@ -90,7 +54,7 @@ export const saveRecipeToSupabase = async (recipe, userId) => {
         is_public: false
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.schema('jacomprei')
         .from('recipes')
         .insert([payload])
         .select()
@@ -101,11 +65,18 @@ export const saveRecipeToSupabase = async (recipe, userId) => {
     }
 
     // Retorna dados com slug para redirecionamento
-    return { ...data[0], slug }
+    const result = { ...data[0], slug };
+
+    // Trigger metadata extraction (non-blocking)
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+    fetch(`${API_BASE}/api/recipes/${result.id}/extract-metadata`, { method: 'POST' })
+        .catch(e => console.warn('Metadata extraction trigger failed (non-blocking):', e));
+
+    return result;
 }
 
 export const getRecipeBySlug = async (slug) => {
-    const { data, error } = await supabase
+    const { data, error } = await supabase.schema('jacomprei')
         .from('recipes')
         .select('*')
         .eq('slug', slug)
@@ -122,7 +93,7 @@ export const getRecipeBySlug = async (slug) => {
 export const getSavedRecipes = async (userId) => {
     if (!userId) throw new Error('Usuário não autenticado')
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.schema('jacomprei')
         .from('recipes')
         .select('*')
         .eq('user_id', userId)
@@ -147,7 +118,7 @@ export const saveShoppingList = async (userId, listTitle, items) => {
         items: items // JSONB
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.schema('jacomprei')
         .from('shopping_lists')
         .insert([payload])
         .select();
@@ -165,7 +136,7 @@ export const getShoppingLists = async (userId) => {
 
     console.log('Fetching lists for user:', userId);
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase.schema('jacomprei')
         .from('shopping_lists')
         .select('*')
         .eq('user_id', userId)
@@ -181,7 +152,7 @@ export const getShoppingLists = async (userId) => {
 }
 
 export const deleteShoppingList = async (listId) => {
-    const { error } = await supabase
+    const { error } = await supabase.schema('jacomprei')
         .from('shopping_lists')
         .delete()
         .eq('id', listId);
@@ -193,7 +164,7 @@ export const deleteShoppingList = async (listId) => {
 }
 
 export const getShoppingListById = async (listId) => {
-    const { data, error } = await supabase
+    const { data, error } = await supabase.schema('jacomprei')
         .from('shopping_lists')
         .select('*')
         .eq('id', listId)
@@ -213,26 +184,25 @@ export const checkCredits = async (userId) => {
     if (!userId) throw new Error('Usuário não autenticado');
 
     // Fetch profile
-    let { data: profile, error } = await supabase
+    let { data: profile, error } = await supabase.schema('jacomprei')
         .from('profiles')
         .select('credits_balance, subscription_tier')
         .eq('id', userId)
         .single();
 
     if (error) {
-        // Se perfil não existe (primeiro login antes do trigger rodar?), tenta criar ou assume default
         console.warn('Profile not found, assuming defaults or error:', error);
-        // Fallback or retry logic could go here. For MVP, we might error out or treat as free with 0 credits if table exists but empty.
-        // Assuming profile trigger works, this shouldn't happen often.
         throw error;
     }
 
-    const isAdmin = profile.subscription_tier === 'admin';
+    const role = profile.subscription_tier;
+    const isPrivileged = role === 'dev' || role === 'admin';
     const hasCredits = profile.credits_balance > 0;
 
     return {
-        allowed: isAdmin || hasCredits,
-        isAdmin,
+        allowed: isPrivileged || hasCredits,
+        isPrivileged,
+        role,
         balance: profile.credits_balance
     };
 };
@@ -241,7 +211,7 @@ export const deductCredit = async (userId) => {
     if (!userId) throw new Error('Usuário não autenticado');
 
     // 1. Re-check status/admin
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await supabase.schema('jacomprei')
         .from('profiles')
         .select('credits_balance, subscription_tier')
         .eq('id', userId)
@@ -249,18 +219,18 @@ export const deductCredit = async (userId) => {
 
     if (profileError) throw profileError;
 
-    if (profile.subscription_tier === 'admin') {
-        console.log('Admin user: No credit deducted.');
-        return; // God mode
+    // Privilege bypass (God Mode / Admin)
+    if (profile.subscription_tier === 'dev' || profile.subscription_tier === 'admin') {
+        console.log('Privileged user (dev/admin): No credit deducted.');
+        return;
     }
 
     if (profile.credits_balance <= 0) {
         throw new Error('Saldo insuficiente.');
     }
 
-    // 2. Deduct Logic (Optimistic UI handled by caller usually, but here we do DB)
-    // Update profile
-    const { error: updateError } = await supabase
+    // 2. Deduct Logic
+    const { error: updateError } = await supabase.schema('jacomprei')
         .from('profiles')
         .update({ credits_balance: profile.credits_balance - 1 })
         .eq('id', userId);
@@ -268,7 +238,7 @@ export const deductCredit = async (userId) => {
     if (updateError) throw updateError;
 
     // 3. Log Transaction
-    const { error: logError } = await supabase
+    const { error: logError } = await supabase.schema('jacomprei')
         .from('credit_transactions')
         .insert([{
             user_id: userId,
@@ -278,6 +248,5 @@ export const deductCredit = async (userId) => {
 
     if (logError) {
         console.error('Error logging transaction:', logError);
-        // We don't throw here to avoid breaking the user flow after successful deduction
     }
 };

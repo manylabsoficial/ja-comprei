@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, ScanLine, BookOpen, ShoppingCart, User, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, ScanLine, BookOpen, ShoppingCart, User } from 'lucide-react';
 
 export default function BottomNav() {
     const navigate = useNavigate();
@@ -50,25 +49,11 @@ export default function BottomNav() {
         },
     ];
 
-    const [isExpanded, setIsExpanded] = useState(true);
-
+    // Barra de vidro fixa, sempre visível — sem recolhimento (era um padrão de
+    // navegação imprevisível; ver docs/DESIGN_PROPOSAL.md, seção 4.10).
     return (
-        <div
-            className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isExpanded ? 'translate-y-0' : 'translate-y-[calc(100%)]'
-                }`}
-        >
-            {/* Toggle Handle */}
-            <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="absolute -top-8 right-6 bg-white/90 dark:bg-[#171c19]/90 backdrop-blur-md px-3 py-1 rounded-t-xl border-t border-x border-gray-100 dark:border-white/5 shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary transition-colors flex items-center gap-1"
-                aria-label={isExpanded ? "Minimizar menu" : "Expandir menu"}
-            >
-                <div className="text-[10px] font-bold uppercase tracking-wider mr-1">Menu</div>
-                {isExpanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-            </button>
-
-            {/* Nav Body */}
-            <div className="bg-white/95 dark:bg-[#171c19]/95 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 pb-safe pt-2 px-6">
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+            <div className="bg-surface-overlay/90 backdrop-blur-xl border-t border-border-subtle pb-safe pt-2 px-6">
                 <div className="flex items-center justify-around max-w-md mx-auto mb-2">
                     {navItems.map((item) => {
                         const active = isActive(item.path);
@@ -79,13 +64,10 @@ export default function BottomNav() {
                                 <button
                                     key={item.id}
                                     onClick={() => navigate(item.path)}
-                                    // Use tabIndex to prevent focus when collapsed (optional polish)
-                                    className="relative -top-5 groupe transition-transform active:scale-95"
+                                    className="relative -top-5 transition-transform active:scale-95"
+                                    aria-label={item.label}
                                 >
-                                    <div className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg ${active
-                                        ? 'bg-[#ee522b] text-white shadow-[#ee522b]/40'
-                                        : 'bg-[#221410] dark:bg-[#81B29A] text-white shadow-black/20'
-                                        }`}>
+                                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gold-500 text-on-gold shadow-lg shadow-gold-500/30">
                                         <Icon size={24} />
                                     </div>
                                 </button>
@@ -97,8 +79,8 @@ export default function BottomNav() {
                                 key={item.id}
                                 onClick={() => navigate(item.path)}
                                 className={`flex flex-col items-center gap-1 p-2 transition-colors ${active
-                                    ? 'text-[#81B29A] dark:text-[#81B29A]'
-                                    : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                                    ? 'text-gold-500'
+                                    : 'text-text-tertiary hover:text-text-secondary'
                                     }`}
                             >
                                 <Icon size={24} className={active ? 'fill-current' : ''} />

@@ -101,7 +101,7 @@ export default function SavedListDetailsPage() {
 
     if (loading) {
         return (
-            <div className="flex h-screen w-full items-center justify-center bg-[#FDFBF7] dark:bg-[#171c19]">
+            <div className="flex h-screen w-full items-center justify-center bg-cream dark:bg-[#171b19]">
                 <Loader2 size={40} className="animate-spin text-sage" />
             </div>
         );

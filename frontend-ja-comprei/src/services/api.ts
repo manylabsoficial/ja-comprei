@@ -62,5 +62,34 @@ export const api = {
             console.error("[API ERROR] analisar-nota:", error);
             throw error;
         }
+    },
+
+    async transcribeAudio(audioBlob: Blob) {
+        const url = `${API_URL}/voice/transcribe`;
+        console.log(`[API REQUEST] Transcrevendo áudio... URL: ${url}, Size: ${audioBlob.size}`);
+
+        const formData = new FormData();
+        // Filename 'audio.webm' é importante para o backend/Whisper inferir formato, mas o server confia no header content-type ou magic bytes geralmente.
+        // O backend espera 'file'
+        formData.append('file', audioBlob, 'audio.webm');
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+            });
+
+            console.log(`[API RESPONSE] transcription: ${response.status}`);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Erro na API: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error("[API ERROR] transcribeAudio:", error);
+            throw error;
+        }
     }
 };

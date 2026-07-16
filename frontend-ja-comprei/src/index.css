@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Noto+Serif:wght@400;500;600;700&family=Noto+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
@@ -10,21 +10,78 @@ html {
   scroll-behavior: smooth;
 }
 
-
+/* ────────────────────────────────────────────────────────────────────────
+ * Design system — redesign 2026 (ver docs/DESIGN_PROPOSAL.md).
+ * Dark-first (quase-preto quente + dourado), coerente com a landing pública.
+ * Convenção mantida: ausência de `.dark` = tema claro; `.dark` = escuro.
+ * O padrão de PRIMEIRA VISITA (sem preferência salva) é escuro — ver
+ * src/hooks/useTheme.js — mas o toggle continua funcionando nos dois sentidos,
+ * e o tema claro também ganhou uma paleta coerente com a marca (nada de
+ * sage/terracotta/charcoal-frio antigos).
+ * ──────────────────────────────────────────────────────────────────────── */
 @theme {
-  --color-cream: #FDFBF7;
-  --color-sage: #81B29A;
-  --color-terracotta: #E07A5F;
-  --color-charcoal: #3D405B;
-  --color-primary: #81B29A;
-  --color-accent: #E07A5F;
-  --color-text-main: #3D405B;
-  --color-text-muted: #687d73;
-  --color-background-dark: #121212;
+  /* ── superfícies (claro = padrão da @theme; escuro sobrescrito em .dark) ── */
+  --color-surface-base: #FBF6EC;    /* fundo do app */
+  --color-surface-sunken: #F1E9D8;  /* inputs afundados, trilhos */
+  --color-surface-raised: #FFFFFF;  /* cards, barras, headers */
+  --color-surface-overlay: #FFFFFF; /* drawers, modais, menus */
+  --color-surface-hover: #F3ECDE;   /* hover de itens/linhas */
 
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-sans: "Lato", "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-display: "Playfair Display", serif;
+  /* ── dourado (acento de marca — MESMO valor nos dois temas) ── */
+  --color-gold-300: #f2cf85;
+  --color-gold-400: #edc063;
+  --color-gold-500: #e8b44a; /* accent primário: CTA, ativo */
+  --color-gold-600: #cf9a34; /* pressed/active */
+  --color-gold-700: #a87a24; /* bordas douradas discretas */
+  --color-on-gold: #1a1206;  /* texto/ícone sobre preenchimento dourado */
+
+  /* ── texto ── */
+  --color-text-primary: #2A2118;
+  --color-text-secondary: #6B5F4F;
+  --color-text-tertiary: #9C917E;
+
+  /* ── bordas ── */
+  --color-border-subtle: rgba(42,33,24,0.08);
+  --color-border-default: rgba(42,33,24,0.14);
+  --color-border-strong: rgba(42,33,24,0.24);
+  --color-border-gold: rgba(232,180,74,0.55);
+
+  /* ── semântica (quente-harmonizada, uso exclusivamente semântico) ── */
+  --color-success: #6f9c5e;
+  --color-danger: #c1502f;
+  --color-warning: #e8b44a;
+  --color-info: #6B5F4F;
+
+  /* ── aliases legados ──────────────────────────────────────────────────
+   * Componentes ainda não migrados (Fase 2+) usam estes nomes sempre em
+   * PARES manuais explícitos — ex: `text-charcoal dark:text-cream`,
+   * `bg-white dark:bg-[#171b19]`. Ou seja, cada componente já resolve
+   * claro/escuro sozinho, per-usage. Por isso estes aliases são valores
+   * FIXOS (iguais ao comportamento histórico), NÃO referências reativas
+   * aos tokens novos — se apontassem pra --color-surface-base/--color-
+   * text-primary (que INVERTEM em .dark), um par como `dark:text-cream`
+   * ficaria com texto quase-preto sobre fundo escuro (bug real, visto e
+   * corrigido: título do login ficava ilegível). Dourado é a exceção:
+   * gold-500 é o MESMO valor nos dois temas, então referenciá-lo é seguro.
+   */
+  --color-cream: #FBF6EC;      /* fixo — usado tanto p/ bg claro quanto p/ "texto quase-branco" em dark: */
+  --color-charcoal: #2A2118;   /* fixo — "texto escuro" nos dois temas, sempre pareado com um dark:text-* */
+  --color-text-main: #2A2118;
+  --color-text-muted: #6B5F4F;
+  --color-sage: var(--color-gold-500);      /* seguro: gold-500 não varia entre temas */
+  --color-terracotta: var(--color-gold-500);
+  --color-primary: var(--color-gold-500);
+  --color-accent: var(--color-gold-500);
+  --color-background-dark: #0c0906;
+
+  /* Tipografia: uma sans moderna para tudo — mata a serifa Playfair (a landing
+   * já abandonou serifa por dar ar "editorial/escritura"; o app segue o mesmo
+   * caminho). Redefinir --font-serif/--font-display aqui já converte QUALQUER
+   * uso de `font-serif`/`font-display` no app inteiro, sem tocar componente
+   * por componente. */
+  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-serif: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
 
   --animate-float: float 3s ease-in-out infinite;
   --animate-pulse-ring: pulse-ring 4s ease-in-out infinite;
@@ -106,17 +163,34 @@ html {
   }
 }
 
+/* Tema escuro — sobrescreve os tokens de superfície/texto/borda quando `.dark`
+ * está presente no <html>. O dourado (--color-gold-*) é o MESMO nos dois
+ * temas — só o fundo/texto/borda ao redor dele muda. */
+.dark {
+  --color-surface-base: #0c0906;
+  --color-surface-sunken: #080605;
+  --color-surface-raised: #17110b;
+  --color-surface-overlay: #211812;
+  --color-surface-hover: #2a1f15;
+
+  --color-text-primary: #f3ead9;
+  --color-text-secondary: #c9bda6;
+  --color-text-tertiary: #8c8271;
+
+  --color-border-subtle: rgba(243,234,217,0.07);
+  --color-border-default: rgba(243,234,217,0.12);
+  --color-border-strong: rgba(243,234,217,0.20);
+
+  --color-info: #c9bda6;
+}
+
 /* Base Styles */
 @layer base {
   html {
     font-family: var(--font-sans);
-    background-color: var(--color-cream);
-    color: var(--color-charcoal);
-  }
-
-  html.dark {
-    background-color: var(--color-background-dark);
-    color: #FDFBF7;
+    background-color: var(--color-surface-base);
+    color: var(--color-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   h1,
@@ -125,6 +199,6 @@ html {
   h4,
   h5,
   h6 {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
   }
 }

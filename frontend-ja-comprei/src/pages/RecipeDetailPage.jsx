@@ -23,7 +23,7 @@ export default function RecipeDetailPage() {
 
     if (!recipe) {
         return (
-            <div className="h-screen flex items-center justify-center bg-[#FDFBF7] dark:bg-[#221410] font-serif">
+            <div className="h-screen flex items-center justify-center bg-cream dark:bg-[#171b19] font-serif">
                 <div className="text-center p-6">
                     <h1 className="text-2xl font-bold mb-4">Receita não encontrada</h1>
                     <p className="mb-6 text-gray-500">Não foi possível carregar os detalhes desta receita.</p>

@@ -1,11 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function ManualEntryPage({ onConfirm }) {
     const navigate = useNavigate();
-    // Start with one empty row
-    const [items, setItems] = useState([{ id: Date.now(), name: '', quantity: '' }]);
+    const location = useLocation();
+
+    // Start with passed items or one empty row
+    const [items, setItems] = useState(() => {
+        if (location.state?.initialItems && location.state.initialItems.length > 0) {
+            return location.state.initialItems;
+        }
+        return [{ id: Date.now(), name: '', quantity: '' }];
+    });
 
     // Auto-focus logic for new rows could range from complex to simple. 
     // For now, let's keep it simple.

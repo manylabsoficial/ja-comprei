@@ -45,9 +45,9 @@ export default function SavedRecipesPage() {
     };
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col bg-[#FDFBF7] dark:bg-[#171c19] text-[#221410] dark:text-[#FDFBF7] font-serif transition-colors duration-200">
+        <div className="relative flex min-h-screen w-full flex-col bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 font-serif transition-colors duration-200">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center justify-between bg-[#FDFBF7]/90 backdrop-blur-md px-6 py-4 dark:bg-[#171c19]/95 border-b border-gray-100 dark:border-white/5">
+            <header className="sticky top-0 z-40 flex items-center justify-between bg-cream/90 backdrop-blur-md px-6 py-4 dark:bg-[#171b19]/95 border-b border-gray-100 dark:border-white/5">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/dashboard')}
@@ -56,7 +56,7 @@ export default function SavedRecipesPage() {
                         <ArrowLeft size={24} />
                     </button>
                     <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
-                        <BookOpen size={24} className="text-[#81B29A]" />
+                        <BookOpen size={24} className="text-sage" />
                         Livro de Receitas
                     </h1>
                 </div>

@@ -4,24 +4,28 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      // Cores/fontes reais vêm do @theme em src/index.css (Tailwind v4,
+      // CSS-first) — este bloco existe só como referência/fallback, mantido
+      // em sincronia manual. Ver docs/DESIGN_PROPOSAL.md.
       colors: {
-        cream: '#FDFBF7',
-        sage: '#81B29A',
-        terracotta: '#E07A5F',
-        charcoal: '#3D405B',
-        primary: '#81B29A', // Alias for Sage to match mockups
-        accent: '#E07A5F', // Alias for Terracotta to match mockups
-        'text-main': '#3D405B',
-        'text-muted': '#687d73',
+        cream: '#FBF6EC',
+        sage: '#e8b44a',
+        terracotta: '#e8b44a',
+        charcoal: '#2A2118',
+        primary: '#e8b44a',
+        accent: '#e8b44a',
+        'text-main': '#2A2118',
+        'text-muted': '#6B5F4F',
+        gold: { 300: '#f2cf85', 400: '#edc063', 500: '#e8b44a', 600: '#cf9a34', 700: '#a87a24' },
       },
       fontFamily: {
-        serif: ['Playfair Display', 'Georgia', 'serif'],
-        sans: ['Lato', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'serif'], // Match mockup class
+        serif: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 15px rgba(129, 178, 154, 0.3)',
+        'glow': '0 0 15px rgba(232, 180, 74, 0.3)',
       },
       animation: {
         'float': 'float 3s ease-in-out infinite',
