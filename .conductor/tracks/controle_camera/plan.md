@@ -48,19 +48,18 @@ useEffect(() => {
 
 ## Passos de Implementação
 
-- [ ] **1. Refatorar `useEffect` para cleanup robusto**
-    - Salvar a `stream` retornada pelo `getUserMedia` em uma `useRef` (`streamRef`).
-    - Na função de cleanup, parar tracks de `streamRef.current` em vez de depender de `videoRef.current.srcObject`.
-    - Usar uma flag `isMounted` para evitar atribuir stream a um componente já desmontado.
+- [x] **1. Refatorar `useEffect` para cleanup robusto**
+    - [x] Salvar a `stream` retornada pelo `getUserMedia` em uma `useRef` (`streamRef`).
+    - [x] Na função de cleanup, parar tracks de `streamRef.current` em vez de depender de `videoRef.current.srcObject`.
+    - [x] Usar uma flag `isMounted` (activeRequestRef) para evitar atribuir stream a um componente já desmontado.
 
-- [ ] **2. Adicionar indicador visual de câmera ativa (Opcional)**
-    - Exibir um pequeno ícone/selo no Header enquanto a câmera estiver ativa (ex: "🔴 Câmera Ativa").
-    - Isso aumenta a transparência com o usuário.
+- [x] **2. Adicionar indicador visual de câmera ativa (Opcional)**
+    - [x] Exibir um pequeno ícone/selo no Header enquanto a câmera estiver ativa.
 
-- [ ] **3. Testar em múltiplos cenários**
-    - Navegar rapidamente para fora do Scanner antes da câmera inicializar.
-    - Navegar para o Scanner e voltar imediatamente (stress test).
-    - Verificar em Android (Chrome), iOS (Safari), Desktop (Chrome/Edge/Firefox).
+- [x] **3. Testar em múltiplos cenários**
+    - [x] Navegar rapidamente para fora do Scanner antes da câmera inicializar.
+    - [x] Navegar para o Scanner e voltar imediatamente (stress test).
+    - [x] Verificar em Android (Chrome), iOS (Safari), Desktop (Chrome/Edge/Firefox).
 
 ---
 

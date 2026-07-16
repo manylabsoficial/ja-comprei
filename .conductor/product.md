@@ -17,6 +17,7 @@ Aplicação inteligente para gerenciamento de compras domésticas e culinária, 
     - Acesse a qualquer momento na aba "Minhas Receitas".
     - Sincronização automática na nuvem (Supabase).
 10. **Navegação Simplificada:** Barra de menu inferior persistente (Home, Novo, Receitas) para acesso rápido.
+11. **Memória Evolutiva (Personalização RAG):** O Chef de IA aprende com suas receitas salvas, identificando proteínas favoritas, restrições e métodos de preparo para personalizar sugestões futuras sem perder a originalidade.
 
 ## Público Alvo
 Pessoas responsáveis pelas compras da casa e cozinha, buscando otimizar tempo e reduzir desperdício.

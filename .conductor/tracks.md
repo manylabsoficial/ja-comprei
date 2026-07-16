@@ -1,6 +1,8 @@
 # Conductor Tracks
 
-This file will contain a list of your project tracks.
+> **Sistema SDD ativo:** Novas iniciativas usam `.conductor/specs/` (specs) e `.conductor/tasks/` (tarefas).
+> Tracks abaixo são o sistema legado — mantidas para referência histórica.
+> Consulte `.conductor/CHANGELOG.md` para o histórico temporal canônico.
 
 ## refatoracao_ia_hibrida
 **Objective:** Refatorar o backend (`src/services/groqService.ts`) para implementar uma estratégia de múltiplos modelos ("Router"), otimizando o consumo de cotas da API Groq e evitando erros de Rate Limit (429). Além disso, implementar suporte a transcrição de áudio (Whisper).
@@ -93,3 +95,26 @@ This file will contain a list of your project tracks.
 ## debug_scanner
 **Objective:** Diagnosticar e resolver o erro 404 no endpoint do scanner de notas, adicionando logs robustos no backend e frontend.
 - [ ] [Diagnóstico de Erros no Scanner](.conductor/tracks/debug_scanner/plan.md)
+
+## memoria_evolutiva
+**Objective:** Implementar sistema de Memória Evolutiva que extrai metadados das receitas salvas e personaliza futuras sugestões com base nas preferências do usuário.
+- [ ] [Memória Evolutiva RAG](.conductor/tracks/memoria_evolutiva/plan.md)
+
+## landing_page_v2
+**Objective:** Criar nova landing page para testes A/B com design mobile-first e destaque para a Memória Evolutiva (IA que aprende com suas receitas).
+- [ ] [Landing Page V2](.conductor/tracks/landing_page_v2/plan.md)
+
+## voice_input
+**Objective:** Implementar entrada por voz no frontend para criação de listas de compras, usando o backend já pronto (`/api/voice/transcribe` com Groq Whisper).
+- [ ] [Entrada por Voz](.conductor/tracks/voice_input/plan.md)
+
+---
+
+## Specs Ativas (SDD — 2026-06-26)
+
+| Spec | Título | Prioridade | Tasks |
+|---|---|---|---|
+| [SPEC-001](specs/SPEC-001-model-vision.md) | Correção MODEL_VISION | P0 | TASK-001 |
+| [SPEC-002](specs/SPEC-002-migracao-modelos.md) | Migração de Modelos de IA | P0 | TASK-002 a TASK-005 |
+| [SPEC-003](specs/SPEC-003-refatoracao-prompts.md) | Refatoração de Prompts | P1 | TASK-006 a TASK-010 |
+| [SPEC-004](specs/SPEC-004-imagens-ghibli.md) | Variação e Qualidade de Imagens | P1 | TASK-011 |

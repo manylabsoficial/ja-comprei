@@ -1,0 +1,77 @@
+{
+  "brand": "Já Comprei",
+  "slug": "ja-comprei",
+  "provider": "manual",
+  "model": "seedance-2.0",
+  "activeProvider": "manual",
+  "stubbed": false,
+  "generatedRealAssets": true,
+  "heroImage": {
+    "prompt": "a slightly crumpled grocery receipt lying on a dark wood table, an out-of-focus smartphone resting beside it, its screen glowing faintly, warm golden side light, shallow depth of field — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark",
+    "stubbed": false,
+    "output": "assets/hero.png"
+  },
+  "clips": [
+    {
+      "id": "escaneio",
+      "prompt": "the smartphone lifts and hovers over the receipt; a thin blue-white scanning line sweeps down across the paper from top to bottom, the printed text briefly igniting with soft light as the line passes — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark",
+      "referenceHero": true,
+      "startFrame": null,
+      "endFrame": null,
+      "resolution": "1080p",
+      "stubbed": false,
+      "note": null,
+      "file": "assets/clips/escaneio.mp4"
+    },
+    {
+      "id": "holograma",
+      "prompt": "from where the scan line ended, three translucent glowing blue-white holographic ingredient icons — an egg, a tomato, a sprig of herb — rise slowly off the receipt and hover above the table, faint particle light tracing their wireframe edges, ghostly and immaterial — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark",
+      "referenceHero": true,
+      "startFrame": "escaneio:final",
+      "endFrame": null,
+      "resolution": "1080p",
+      "stubbed": false,
+      "note": null,
+      "file": "assets/clips/holograma.mp4"
+    },
+    {
+      "id": "materializacao",
+      "prompt": "the three glowing holographic ingredient icons drift sideways through the air as the camera slowly zooms out, revealing a wooden cutting board resting on the table beside the receipt; as the ambient light gradually brightens from dim shadow to a soft warm glow, the holograms glide over the board and rapidly fill with real color and texture, the blue wireframe glow dissolving as they solidify into physical objects — a real cracked egg, a ripe tomato, fresh herbs — settling onto the cutting board with a soft physical weight — shot on a 50mm macro lens, warm side light from a low window growing brighter, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark",
+      "referenceHero": true,
+      "startFrame": "holograma:final",
+      "endFrame": null,
+      "resolution": "1080p",
+      "stubbed": false,
+      "note": null,
+      "file": "assets/clips/materializacao.mp4"
+    },
+    {
+      "id": "prato",
+      "prompt": "the real ingredients on the table lift, swirl together in a graceful arc, and settle into a beautifully finished plated dish at the center of frame, steam gently rising, camera slowly pulling back to reveal the empty receipt and phone resting beside the plate — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark",
+      "referenceHero": true,
+      "startFrame": "materializacao:final",
+      "endFrame": null,
+      "resolution": "1080p",
+      "stubbed": false,
+      "note": null,
+      "file": "assets/clips/prato.mp4"
+    }
+  ],
+  "frames": {
+    "count": 336,
+    "dir": "assets/frames",
+    "format": "webp",
+    "pattern": "frame-%04d.webp",
+    "stubbed": false,
+    "width": 1440
+  },
+  "framesVertical": {
+    "count": 261,
+    "dir": "assets/frames-vertical",
+    "format": "webp",
+    "pattern": "frame-%04d.webp",
+    "stubbed": false,
+    "width": 768
+  },
+  "missing": []
+}

@@ -12,4 +12,5 @@
 
 ### Fase 3: Verificação
 - [x] Testar em ambiente de desenvolvimento se os logs aparecem no console <!-- id: dbg_5 -->
-- [ ] Confirmar com o usuário se o erro 404 persiste em produção após o deploy das melhorias de log <!-- id: dbg_6 -->
+- [x] Confirmar com o usuário se o erro 404 persiste em produção após o deploy das melhorias de log <!-- id: dbg_6 -->
+- [x] Corrigir conflito de dependências no requirements.txt (Railway Build) <!-- id: dbg_7 -->

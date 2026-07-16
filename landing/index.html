@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Já Comprei — Sua próxima receita já está esperando.</title>
+<meta name="description" content="Fotografe a nota do mercado — ou abra a geladeira — e receba receitas na hora."/>
+<meta property="og:title" content="Já Comprei"/>
+<meta property="og:image" content="https://jacomprei.app/assets/hero.png"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Crect width='8' height='8' fill='%230c0906'/%3E%3Ccircle cx='4' cy='4' r='2' fill='%23e8b44a'/%3E%3C/svg%3E"/>
+<link rel="stylesheet" href="site.css"/>
+<link rel="canonical" href="https://jacomprei.app/"/>
+<meta name="robots" content="index, follow"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://jacomprei.app/"/>
+<meta property="og:locale" content="pt_BR"/>
+<meta property="og:description" content="Fotografe a nota do mercado — ou abra a geladeira — e receba receitas na hora."/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Já Comprei"/>
+<meta name="twitter:description" content="Fotografe a nota do mercado — ou abra a geladeira — e receba receitas na hora."/>
+<meta name="twitter:image" content="https://jacomprei.app/assets/hero.png"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Já Comprei","description":"Fotografe a nota do mercado — ou abra a geladeira — e receba receitas na hora.","url":"https://jacomprei.app","applicationCategory":"LifestyleApplication","operatingSystem":"Web"}</script>
+<style>
+  :root {
+    --bg: #0c0906; --accent: #e8b44a; --text: #f3ead9;
+    --serif: system-ui, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+</style>
+</head>
+<body>
+  <div id="veil"><div class="mark">Já Comprei</div><div class="bar"><i></i></div></div>
+
+  <canvas id="scene"></canvas>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+
+  <header class="topbar">
+    <span>Já Comprei</span>
+    <span>NO. 08</span>
+  </header>
+  
+  <aside class="hud" aria-hidden="true">
+    <span class="label">RECEITAS</span>
+    <div class="rail"><div id="hud-bar"></div></div>
+    <span id="hud-value">0</span>
+  </aside>
+
+  <main>
+    <section id="hero" class="chapter" data-align="left" data-id="hero">
+      <div class="chapter-inner">
+        <div class="kicker">JÁ COMPREI</div>
+        <h1>Sua próxima receita já está esperando.</h1>
+        <div class="hero-sub">Fotografe a nota do mercado — ou abra a geladeira — e receba receitas na hora.</div>
+      </div>
+    </section>
+    <section id="escaneio" class="chapter" data-align="left" data-id="escaneio">
+      <div class="chapter-inner">
+        <div class="kicker">MODO CÂMERA</div>
+        <h2>Aponte. A nota já virou receita.</h2>
+        <p class="lead">Aponte a câmera — ela lê os itens da compra pra você.</p>
+      </div>
+    </section>
+    <section id="holograma" class="chapter" data-align="right" data-id="holograma">
+      <div class="chapter-inner">
+        <div class="kicker">EM TEMPO REAL</div>
+        <h2>Cada item, reconhecido na hora.</h2>
+        <p class="lead">A IA identifica o que você comprou antes de você guardar a sacola.</p>
+      </div>
+    </section>
+    <section id="materializacao" class="chapter" data-align="left" data-id="materializacao">
+      <div class="chapter-inner">
+        <div class="kicker">DADO VIRA INGREDIENTE</div>
+        <h2>De número na nota a ingrediente de verdade.</h2>
+        <p class="lead">A câmera abre, a luz acende, e o que era dado vira ingrediente de verdade na tábua.</p>
+      </div>
+    </section>
+    <section id="prato" class="chapter" data-align="right" data-id="prato">
+      <div class="chapter-inner">
+        <div class="kicker">PRONTO</div>
+        <h2>Sua próxima receita, servida.</h2>
+        <p class="lead">Simples num dia corrido, elaborada quando der vontade.</p>
+      </div>
+    </section>
+    <section class="chapter" data-align="left" data-id="specs">
+      <div class="chapter-inner">
+        <div class="kicker">Especificações</div>
+        <div class="specs">
+          <div class="spec"><div class="k">MODO NOTA FISCAL</div><div class="v">leitura automática dos itens</div></div>
+          <div class="spec"><div class="k">MODO GELADEIRA</div><div class="v">reconhecimento visual dos ingredientes</div></div>
+          <div class="spec"><div class="k">MODO MANUAL</div><div class="v">você digita e gera as receitas com a combinação que quiser</div></div>
+          <div class="spec"><div class="k">RECEITAS</div><div class="v">do simples ao elaborado</div></div>
+          <div class="spec"><div class="k">OBJETIVO</div><div class="v">menos desperdício, mais praticidade</div></div>
+        </div>
+      </div>
+    </section>
+    <section class="chapter cta" data-align="center" data-id="cta">
+      <div class="chapter-inner">
+        <h2>Sua próxima receita já está esperando.</h2>
+        <a class="btn" href="https://app.jacomprei.app/login" data-cta-link data-href-prod="https://app.jacomprei.app/login" data-href-dev="http://localhost:5173/login">Entrar</a>
+      </div>
+    </section>
+  </main>
+
+  <div class="scrollcue">role ↓</div>
+  <a class="cta-float" href="https://app.jacomprei.app/login" data-cta-link data-href-prod="https://app.jacomprei.app/login" data-href-dev="http://localhost:5173/login">Entrar</a>
+
+  <script>window.__STORY__ = {"brand":"Já Comprei","slug":"ja-comprei","tagline":"Sua próxima receita já está esperando.","subtitle":"Fotografe a nota do mercado — ou abra a geladeira — e receba receitas na hora.","archetype":"assemble","templateId":"08","accent":"#e8b44a","bg":"#0c0906","text":"#f3ead9","camera":{"path":"dolly","axis":"z","lookAhead":0.03,"span":120,"radius":0},"waypoints":[{"id":"hero","index":0,"p":0,"pos":[0,0,0],"fog":"#566776","particle":{"color":"#faf7f0","count":1500,"style":"assemble"},"subject":"particle-dashboard","light":{"flood":false,"vents":false,"rim":false},"hud":0},{"id":"escaneio","index":1,"p":0.25,"pos":[5.65685424949238,3,-30],"fog":"#44505a","particle":{"color":"#f6e6c7","count":1325,"style":"assemble"},"subject":null,"light":{"flood":false,"vents":false,"rim":false},"hud":15},{"id":"holograma","index":2,"p":0.5,"pos":[8,3.6739403974420594e-16,-60],"fog":"#31383e","particle":{"color":"#f1d69d","count":1150,"style":"assemble"},"subject":null,"light":{"flood":false,"vents":false,"rim":false},"hud":40},{"id":"materializacao","index":3,"p":0.75,"pos":[5.656854249492381,-3,-90],"fog":"#1f2122","particle":{"color":"#edc574","count":975,"style":"assemble"},"subject":null,"light":{"flood":false,"vents":false,"rim":false},"hud":70},{"id":"prato","index":4,"p":1,"pos":[9.797174393178826e-16,-7.347880794884119e-16,-120],"fog":"#0c0906","particle":{"color":"#e8b44a","count":800,"style":"assemble"},"subject":null,"light":{"flood":false,"vents":false,"rim":false},"hud":12000}],"hud":{"label":"RECEITAS","unit":"","from":0,"to":12000},"sections":[{"id":"hero","zone":"A NOTA","kicker":"JÁ COMPREI","title":"Sua próxima receita já está esperando.","body":"Sem lista de compras. Sem desperdício. Escaneie a nota — ou abra a geladeira — e a IA cria o prato.","carry":null,"hudValue":0,"start":0},{"id":"escaneio","zone":"O SCAN","kicker":"MODO CÂMERA","title":"Aponte. A nota já virou receita.","body":"Aponte a câmera — ela lê os itens da compra pra você.","carry":"final-frame→start-frame","hudValue":15,"start":0.25},{"id":"holograma","zone":"O RECONHECIMENTO","kicker":"EM TEMPO REAL","title":"Cada item, reconhecido na hora.","body":"A IA identifica o que você comprou antes de você guardar a sacola.","carry":"final-frame→start-frame","hudValue":40,"start":0.5},{"id":"materializacao","zone":"A TRANSFORMAÇÃO","kicker":"DADO VIRA INGREDIENTE","title":"De número na nota a ingrediente de verdade.","body":"A câmera abre, a luz acende, e o que era dado vira ingrediente de verdade na tábua.","carry":"final-frame→start-frame","hudValue":70,"start":0.75},{"id":"prato","zone":"O PRATO","kicker":"PRONTO","title":"Sua próxima receita, servida.","body":"Simples num dia corrido, elaborada quando der vontade.","carry":"final-frame→start-frame","hudValue":12000,"start":1}],"continuityMap":[{"from":"hero","to":"escaneio","carry":"final-frame → start-frame","camera":"spline segment 0→1","transition":"seam is a single shared frame (invisible)","fogFrom":"#566776","fogTo":"#44505a"},{"from":"escaneio","to":"holograma","carry":"final-frame → start-frame","camera":"spline segment 1→2","transition":"seam is a single shared frame (invisible)","fogFrom":"#44505a","fogTo":"#31383e"},{"from":"holograma","to":"materializacao","carry":"final-frame → start-frame","camera":"spline segment 2→3","transition":"seam is a single shared frame (invisible)","fogFrom":"#31383e","fogTo":"#1f2122"},{"from":"materializacao","to":"prato","carry":"final-frame → start-frame","camera":"spline segment 3→4","transition":"seam is a single shared frame (invisible)","fogFrom":"#1f2122","fogTo":"#0c0906"}],"specs":[["MODO NOTA FISCAL","leitura automática dos itens"],["MODO GELADEIRA","reconhecimento visual dos ingredientes"],["MODO MANUAL","você digita e gera as receitas com a combinação que quiser"],["RECEITAS","do simples ao elaborado"],["OBJETIVO","menos desperdício, mais praticidade"]],"cta":{"headline":"Sua próxima receita já está esperando.","button":"Entrar","href":"https://app.jacomprei.app/login","hrefDev":"http://localhost:5173/login"},"lang":"pt-BR","ui":{"scroll":"role ↓","specification":"Especificações"},"font":"sans","siteUrl":"https://jacomprei.app","shots":[{"id":"hero-image","kind":"image","prompt":"a slightly crumpled grocery receipt lying on a dark wood table, an out-of-focus smartphone resting beside it, its screen glowing faintly, warm golden side light, shallow depth of field — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark","referenceHero":false},{"id":"escaneio","kind":"clip","prompt":"the smartphone lifts and hovers over the receipt; a thin blue-white scanning line sweeps down across the paper from top to bottom, the printed text briefly igniting with soft light as the line passes — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark","referenceHero":true,"startFrame":null,"endFrame":null},{"id":"holograma","kind":"clip","prompt":"from where the scan line ended, three translucent glowing blue-white holographic ingredient icons — an egg, a tomato, a sprig of herb — rise slowly off the receipt and hover above the table, faint particle light tracing their wireframe edges, ghostly and immaterial — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark","referenceHero":true,"startFrame":"escaneio:final","endFrame":null},{"id":"materializacao","kind":"clip","prompt":"the three glowing holographic ingredient icons drift sideways through the air as the camera slowly zooms out, revealing a wooden cutting board resting on the table beside the receipt; as the ambient light gradually brightens from dim shadow to a soft warm glow, the holograms glide over the board and rapidly fill with real color and texture, the blue wireframe glow dissolving as they solidify into physical objects — a real cracked egg, a ripe tomato, fresh herbs — settling onto the cutting board with a soft physical weight — shot on a 50mm macro lens, warm side light from a low window growing brighter, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark","referenceHero":true,"startFrame":"holograma:final","endFrame":null},{"id":"prato","kind":"clip","prompt":"the real ingredients on the table lift, swirl together in a graceful arc, and settle into a beautifully finished plated dish at the center of frame, steam gently rising, camera slowly pulling back to reveal the empty receipt and phone resting beside the plate — shot on a 50mm macro lens, warm golden side light from a low window, textured dark wood table, subtle dust motes drifting in the light, photorealistic, cinematic color grade, no text, no watermark","referenceHero":true,"startFrame":"materializacao:final","endFrame":null}],"generation":{"provider":"higgsfield","model":"seedance-2.0","mode":"std","resolution":"1080p","aspect":"16:9","durationSec":8,"chained":true,"frameFps":12,"frameQuality":80,"frameMaxWidth":1440},"engine":"frameseq","frames":{"count":336,"dir":"assets/frames","format":"webp","pattern":"frame-%04d.webp","stubbed":false,"width":1440},"framesVertical":{"count":261,"dir":"assets/frames-vertical","format":"webp","pattern":"frame-%04d.webp","stubbed":false,"width":768},"heroImage":"assets/hero.png"};</script>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+  <script src="vendor/lenis.min.js"></script>
+  <script src="engine.js"></script>
+  <script>
+    (function () {
+      var veil = document.getElementById('veil');
+      var t = setInterval(function () {
+        if (window.__ENGINE_READY__) { veil.classList.add('gone'); clearInterval(t); }
+      }, 60);
+      setTimeout(function () { veil.classList.add('gone'); }, 4000); // safety
+    })();
+    // CTA smart-routing: the SAME built site is used both for local testing
+    // and production. If this page itself is being viewed on localhost/
+    // 127.0.0.1/file://, point CTAs at cta.hrefDev instead of cta.href.
+    (function () {
+      var h = window.location.hostname;
+      var isLocal = h === 'localhost' || h === '127.0.0.1' || window.location.protocol === 'file:';
+      if (!isLocal) return;
+      document.querySelectorAll('[data-cta-link]').forEach(function (a) {
+        var dev = a.getAttribute('data-href-dev');
+        if (dev) a.setAttribute('href', dev);
+      });
+    })();
+  </script>
+</body>
+</html>
