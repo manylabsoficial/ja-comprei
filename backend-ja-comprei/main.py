@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import voice_router, recipe_router, auth_router
 from dotenv import load_dotenv
 
-# Load env vars
+# Load env vars before imports
 load_dotenv()
+
+from app.routers import voice_router, recipe_router, auth_router, metadata_router
 
 app = FastAPI(title="Já Comprei Backend", version="2.0.0")
 
@@ -12,10 +13,13 @@ app = FastAPI(title="Já Comprei Backend", version="2.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Vite Dev
+        "http://localhost:5173",  # Vite Dev 1
+        "http://localhost:5174",  # Vite Dev 2
+        "http://localhost:5175",  # Vite Dev 3
         "http://localhost:3000",  # React Default
-        "https://jacomprei.app",  # Production
+        "https://jacomprei.app",  # Production — landing pública (arquitetura dividida)
         "https://www.jacomprei.app", # WWW Production
+        "https://app.jacomprei.app", # Production — SPA do app (subdomínio, arquitetura dividida)
         "https://api.jacomprei.app" # Self (docs)
     ],
     allow_credentials=True,

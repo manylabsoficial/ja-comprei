@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from app.schemas import UserRegister, PasswordResetRequest
 from app.services.email_service import email_service
 from app.core.config import get_settings
@@ -113,3 +113,57 @@ async def request_password_reset(data: PasswordResetRequest, background_tasks: B
         pass
 
     return {"message": "If the email exists, a reset link has been sent."}
+
+
+@router.post("/manylabs/ensure-access", status_code=200)
+async def ensure_manylabs_access(request: Request):
+    """
+    Endpoint de Autoativação Segura do ManyLabs.
+    Verifica o token recebido e carimba a permissão de acesso ao Já Comprei
+    utilizando a Service Role.
+    """
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    access_token = auth_header.split(" ")[1]
+    
+    # 1. Validar a identidade do usuário com o token enviado pelo frontend
+    # Criamos um client normal (sem service_role) só pra validar o JWT
+    settings = get_settings()
+    user_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+    
+    try:
+        user_response = user_client.auth.get_user(access_token)
+        if not user_response or not user_response.user:
+            raise Exception("Invalid session")
+    except Exception as e:
+        logger.error(f"Error getting user from token: {e}")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
+    user = user_response.user
+    user_name = user.user_metadata.get('nome', user.user_metadata.get('name', 'Chef')) if user.user_metadata else 'Chef'
+    
+    # 2. Executar a autorização ManyLabs com a Service Role
+    admin_supabase = get_supabase_admin()
+    
+    try:
+        rpc_response = admin_supabase.rpc("ensure_manylabs_app_access", {
+            "p_user_id": user.id,
+            "p_email": user.email,
+            "p_display_name": user_name
+        }).execute()
+        
+        ok = rpc_response.data
+        if not ok:
+             raise HTTPException(status_code=403, detail="app_access_required")
+             
+        return {"ok": True}
+        
+    except Exception as e:
+        logger.error(f"RPC ensure_manylabs_app_access error: {e}")
+        # A API pode levantar um HTTP Exception que queremos repassar
+        if isinstance(e, HTTPException):
+             raise e
+        raise HTTPException(status_code=500, detail="manylabs_rpc_failed")
+
