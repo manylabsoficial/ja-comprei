@@ -60,20 +60,6 @@ export default function SavedListDetailsPage() {
             if (result && result.receitas) {
                 const recipesWithImages = result.receitas;
 
-                // Preload images
-                await Promise.all(recipesWithImages.map(recipe => {
-                    return new Promise((resolve) => {
-                        if (!recipe.image_url) {
-                            resolve();
-                            return;
-                        }
-                        const img = new Image();
-                        img.src = recipe.image_url;
-                        img.onload = resolve;
-                        img.onerror = resolve;
-                    });
-                }));
-
                 setRecipes(recipesWithImages);
 
                 // 3. Descontar Crédito

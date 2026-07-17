@@ -11,7 +11,10 @@ export const api = {
 
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+            // Recipe text plus image generation may use a short provider fallback.
+            // Keep this above the backend's bounded work instead of aborting a
+            // request that is still valid.
+            const timeoutId = setTimeout(() => controller.abort(), 120000);
 
             const response = await fetch(url, {
                 method: 'POST',

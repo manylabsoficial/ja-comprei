@@ -138,7 +138,7 @@ export const saveShoppingList = async (userId, listTitle, items) => {
     return response.json();
 }
 
-const getShoppingListApiContext = async () => {
+const getAuthenticatedApiContext = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Session expired. Sign in again to access saved lists.');
 
@@ -148,7 +148,7 @@ const getShoppingListApiContext = async () => {
 };
 
 const shoppingListRequest = async (path = '', options = {}) => {
-    const { apiUrl, accessToken } = await getShoppingListApiContext();
+    const { apiUrl, accessToken } = await getAuthenticatedApiContext();
     const response = await fetch(`${apiUrl}/auth/shopping-lists${path}`, {
         ...options,
         headers: {
@@ -180,71 +180,29 @@ export const deleteShoppingList = async (listId) => shoppingListRequest(`/${enco
 
 export const checkCredits = async (userId) => {
     if (!userId) throw new Error('Usuário não autenticado');
-
-    // Fetch profile
-    let { data: profile, error } = await supabase.schema('jacomprei')
-        .from('profiles')
-        .select('credits_balance, subscription_tier')
-        .eq('id', userId)
-        .single();
-
-    if (error) {
-        console.warn('Profile not found, assuming defaults or error:', error);
-        throw error;
+    const { apiUrl, accessToken } = await getAuthenticatedApiContext();
+    const response = await fetch(`${apiUrl}/auth/credits`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'Unable to verify credits.');
     }
-
-    const role = profile.subscription_tier;
-    const isPrivileged = role === 'dev' || role === 'admin';
-    const hasCredits = profile.credits_balance > 0;
-
-    return {
-        allowed: isPrivileged || hasCredits,
-        isPrivileged,
-        role,
-        balance: profile.credits_balance
-    };
+    return response.json();
 };
 
 export const deductCredit = async (userId) => {
     if (!userId) throw new Error('Usuário não autenticado');
-
-    // 1. Re-check status/admin
-    const { data: profile, error: profileError } = await supabase.schema('jacomprei')
-        .from('profiles')
-        .select('credits_balance, subscription_tier')
-        .eq('id', userId)
-        .single();
-
-    if (profileError) throw profileError;
-
-    // Privilege bypass (God Mode / Admin)
-    if (profile.subscription_tier === 'dev' || profile.subscription_tier === 'admin') {
-        console.log('Privileged user (dev/admin): No credit deducted.');
-        return;
+    const { apiUrl, accessToken } = await getAuthenticatedApiContext();
+    const response = await fetch(`${apiUrl}/auth/credits/consume`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'Unable to consume credit.');
     }
-
-    if (profile.credits_balance <= 0) {
-        throw new Error('Saldo insuficiente.');
-    }
-
-    // 2. Deduct Logic
-    const { error: updateError } = await supabase.schema('jacomprei')
-        .from('profiles')
-        .update({ credits_balance: profile.credits_balance - 1 })
-        .eq('id', userId);
-
-    if (updateError) throw updateError;
-
-    // 3. Log Transaction
-    const { error: logError } = await supabase.schema('jacomprei')
-        .from('credit_transactions')
-        .insert([{
-            user_id: userId,
-            amount: -1,
-            description: 'Geração de Receita'
-        }]);
-
-    if (logError) {
-        console.error('Error logging transaction:', logError);
-    }
+    const status = await response.json();
+    if (!status.allowed) throw new Error('Saldo insuficiente.');
+    return status;
 };

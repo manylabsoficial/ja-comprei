@@ -194,6 +194,42 @@ async def ensure_manylabs_access(request: Request):
         raise HTTPException(status_code=500, detail="manylabs_rpc_failed")
 
 
+@router.get("/credits")
+async def get_credit_status(request: Request):
+    """Return the current user's credit status without exposing `jacomprei`."""
+    user = get_authenticated_user(request)
+    try:
+        response = get_supabase_admin().rpc("jacomprei_get_credit_status", {
+            "p_user_id": user.id,
+        }).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="credit_profile_not_found")
+        return response.data[0]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Failed to get credit status for user %s", user.id)
+        raise HTTPException(status_code=500, detail="credit_status_failed") from exc
+
+
+@router.post("/credits/consume")
+async def consume_credit(request: Request):
+    """Atomically consume one generation credit for the authenticated user."""
+    user = get_authenticated_user(request)
+    try:
+        response = get_supabase_admin().rpc("jacomprei_consume_credit", {
+            "p_user_id": user.id,
+        }).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="credit_profile_not_found")
+        return response.data[0]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Failed to consume credit for user %s", user.id)
+        raise HTTPException(status_code=500, detail="credit_consume_failed") from exc
+
+
 @router.post("/shopping-lists", status_code=201)
 async def create_shopping_list(payload: ShoppingListCreate, request: Request):
     """Persist a list without exposing the private `jacomprei` schema to Data API."""

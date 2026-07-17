@@ -76,7 +76,10 @@ The final image must look like an authentic, appetizing photograph of a dish som
         if settings.OPENROUTER_API_KEY:
             try:
                 logger.info("ImageService: Generating image with OpenRouter model %s", settings.OPENROUTER_IMAGE_MODEL)
-                async with httpx.AsyncClient(timeout=45.0) as client:
+                # Image providers can queue for a long time. The recipe flow must
+                # stay responsive, so fall back promptly instead of holding the
+                # entire request open until the browser aborts it.
+                async with httpx.AsyncClient(timeout=20.0) as client:
                     response = await client.post(
                         self.openrouter_url,
                         headers={
@@ -112,7 +115,7 @@ The final image must look like an authentic, appetizing photograph of a dish som
                     else:
                         logger.warning("ImageService: OpenRouter failed with status %s: %s", response.status_code, response.text)
             except Exception as exc:
-                logger.warning("ImageService: OpenRouter raised exception: %s", exc)
+                logger.warning("ImageService: OpenRouter raised exception: %r", exc)
 
         logger.info("ImageService: Falling back to Pollinations AI.")
         return pollinations_service.get_ghibli_url(full_prompt, meal_type=meal_type)
