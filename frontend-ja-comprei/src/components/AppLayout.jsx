@@ -5,7 +5,7 @@ export default function AppLayout({ children }) {
     const location = useLocation();
 
     // Definição de rotas onde a barra NÃO deve aparecer
-    const hideNavRoutes = ['/', '/landing-classic', '/index2', '/v2', '/login', '/confirmacao']; // Landing Pages e Auth
+    const hideNavRoutes = ['/', '/landing-classic', '/index2', '/v2', '/login', '/confirmacao', '/auth/callback', '/acesso-indisponivel']; // Landing Pages e Auth
     const shouldShowNav = !hideNavRoutes.includes(location.pathname);
 
     return (

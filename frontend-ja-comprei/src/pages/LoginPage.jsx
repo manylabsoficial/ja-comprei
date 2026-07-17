@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { ensureManyLabsAccess, getSafeNextPath } from '../lib/manylabs';
 import Logo from '../assets/images/Logo.png';
 import kitchenBg from '../assets/images/kitchen_quadrado.png';
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                navigate(from, { replace: true });
+                navigate(`/auth/callback?next=${encodeURIComponent(getSafeNextPath(from))}`, { replace: true });
             }
         };
         checkSession();
@@ -33,7 +34,7 @@ export default function LoginPage() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`,
+                    redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(getSafeNextPath(from))}`,
                     queryParams: {
                         prompt: 'select_account'
                     }
@@ -66,29 +67,25 @@ export default function LoginPage() {
                 if (error) throw error;
                 
                 // --- ManyLabs Ensure Access ---
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-                const baseApi = apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
-                
-                const response = await fetch(`${baseApi}/auth/manylabs/ensure-access`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authData.session.access_token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    await supabase.auth.signOut();
-                    throw new Error('Não conseguimos ativar o Já Comprei para sua Conta ManyLabs. Fale com o suporte.');
+                const access = await ensureManyLabsAccess(authData.session);
+                if (!access.ok) {
+                    navigate('/acesso-indisponivel', {
+                        replace: true,
+                        state: { from: getSafeNextPath(from), reason: access.reason, status: access.status },
+                    });
+                    return;
                 }
 
                 // Limpa flag de logout manual para permitir auto-login futuro se necessário
                 sessionStorage.removeItem('manual_logout');
-                navigate(from, { replace: true });
+                navigate(getSafeNextPath(from), { replace: true });
             } else {
                 const { error } = await supabase.auth.signUp({
                     email,
                     password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    },
                 });
                 if (error) throw error;
                 setError('Verifique seu email para confirmar o cadastro!');

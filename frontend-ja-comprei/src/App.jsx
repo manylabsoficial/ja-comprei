@@ -19,6 +19,8 @@ import ProfilePage from './pages/ProfilePage';
 import SavedRecipeDetailPage from './pages/SavedRecipeDetailPage';
 import RecipeTestPage from './pages/RecipeTestPage';
 import LoginPage from './pages/LoginPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
+import AccessUnavailablePage from './pages/AccessUnavailablePage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ManualEntryPage from './pages/ManualEntryPage';
@@ -324,6 +326,8 @@ export default function App() {
 
           {/* Public: Auth */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/acesso-indisponivel" element={<AccessUnavailablePage />} />
           <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
           <Route path="/confirmacao" element={<ConfirmationPage />} />
         </Routes>
