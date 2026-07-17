@@ -27,7 +27,8 @@ class Settings(BaseSettings):
     POLLINATIONS_MODEL: str = "flux"
     
     # OpenRouter Image Model
-    OPENROUTER_IMAGE_MODEL: str = "black-forest-labs/flux-1-schnell"
+    OPENROUTER_IMAGE_MODEL: str = "openai/gpt-image-1-mini"
+    OPENROUTER_IMAGE_QUALITY: str = "low"
 
     # Supabase Settings
     SUPABASE_URL: str

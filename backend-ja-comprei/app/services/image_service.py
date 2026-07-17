@@ -53,7 +53,6 @@ class ImageService:
 
     def __init__(self):
         self.openrouter_url = "https://openrouter.ai/api/v1/images"
-        self.gemini_image_model = "gemini-2.5-flash-image"
 
     def _build_full_prompt(self, visual_tag: str, meal_type: str) -> str:
         """
@@ -76,22 +75,34 @@ class ImageService:
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     headers = {
                         "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                        "HTTP-Referer": "https://app.jacomprei.app",
+                        "X-OpenRouter-Title": "JÃ¡ Comprei",
                         "Content-Type": "application/json"
                     }
                     payload = {
                         "model": settings.OPENROUTER_IMAGE_MODEL,
                         "prompt": full_prompt,
-                        "aspect_ratio": "1:1",
-                        "n": 1
+                        "n": 1,
+                        "quality": settings.OPENROUTER_IMAGE_QUALITY,
                     }
                     response = await client.post(self.openrouter_url, json=payload, headers=headers)
                     
                     if response.status_code == 200:
                         res_json = response.json()
                         if "data" in res_json and len(res_json["data"]) > 0:
-                            image_url = res_json["data"][0]["url"]
-                            logger.info("ImageService: OpenRouter succeeded.")
-                            return image_url
+                            image_data = res_json["data"][0]
+                            base64_image = image_data.get("b64_json")
+                            if base64_image:
+                                media_type = image_data.get("media_type", "image/png")
+                                logger.info("ImageService: OpenRouter succeeded.")
+                                return f"data:{media_type};base64,{base64_image}"
+
+                            # Compatibility with providers that return a hosted URL.
+                            image_url = image_data.get("url")
+                            if image_url:
+                                logger.info("ImageService: OpenRouter succeeded.")
+                                return image_url
+                            logger.warning("ImageService: OpenRouter response contains no image payload.")
                         else:
                             logger.warning(f"ImageService: OpenRouter empty response data: {res_json}")
                     else:
@@ -99,49 +110,8 @@ class ImageService:
             except Exception as e:
                 logger.warning(f"ImageService: OpenRouter raised exception: {e}")
 
-        # 2. Secondary (Fallback): Gemini Image API
-        if settings.GEMINI_API_KEY:
-            try:
-                logger.info(f"ImageService: Falling back to Gemini Image API ({self.gemini_image_model})...")
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.gemini_image_model}:generateContent?key={settings.GEMINI_API_KEY}"
-                    
-                    payload = {
-                        "contents": [
-                            {
-                                "parts": [
-                                    {
-                                        "text": full_prompt
-                                    }
-                                ]
-                            }
-                        ],
-                        "generationConfig": {
-                            "responseMimeType": "image/png"
-                        }
-                    }
-                    response = await client.post(url, json=payload)
-                    
-                    if response.status_code == 200:
-                        res_json = response.json()
-                        candidates = res_json.get("candidates", [])
-                        if candidates and len(candidates) > 0:
-                            parts = candidates[0].get("content", {}).get("parts", [])
-                            if parts and "inlineData" in parts[0]:
-                                mime_type = parts[0]["inlineData"].get("mimeType", "image/png")
-                                base64_data = parts[0]["inlineData"].get("data")
-                                if base64_data:
-                                    logger.info("ImageService: Gemini Image API succeeded.")
-                                    return f"data:{mime_type};base64,{base64_data}"
-                        
-                        logger.warning(f"ImageService: Gemini API returned unexpected structure: {res_json}")
-                    else:
-                        logger.warning(f"ImageService: Gemini API failed with code {response.status_code}: {response.text}")
-            except Exception as e:
-                logger.warning(f"ImageService: Gemini API raised exception: {e}")
-
-        # 3. Tertiary (Último Recurso): Pollinations AI (returns static generation URL client-side)
-        logger.info("ImageService: Falling back to Pollinations AI (Tertiary)...")
+        # Fallback: Pollinations AI (returns a generation URL fetched by the client).
+        logger.info("ImageService: Falling back to Pollinations AI...")
         # Pollinations generates a URL which the client fetches, so we just return the URL format
         return pollinations_service.get_ghibli_url(visual_tag, meal_type=meal_type)
 
