@@ -365,7 +365,12 @@ async def generate_images_parallel_node(state: RecipeState) -> Dict[str, Any]:
         meal_type = meal_types[index % len(meal_types)]
         
         # Create coroutine
-        tasks.append(image_service.generate_recipe_image(visual_tag, meal_type=meal_type))
+        tasks.append(image_service.generate_recipe_image(
+            visual_tag,
+            meal_type=meal_type,
+            dish_name=recipe.get("nome_do_prato"),
+            ingredients=recipe.get("ingredientes_usados", []),
+        ))
         
     # Execute concurrently
     results = await asyncio.gather(*tasks, return_exceptions=True)
