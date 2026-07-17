@@ -124,7 +124,7 @@ export default function ManualEntryPage({ onConfirm }) {
                                 className="w-full h-14 bg-sage hover:bg-[#6a9480] text-white font-bold rounded-xl shadow-lg shadow-sage/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 <Save size={20} />
-                                Salvar Lista
+                                Avançar para Receitas
                             </button>
                         </div>
                     </div>
