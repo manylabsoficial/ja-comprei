@@ -203,10 +203,10 @@ async def create_shopping_list(payload: ShoppingListCreate, request: Request):
         raise HTTPException(status_code=422, detail="List needs at least one valid item.")
 
     try:
-        response = get_supabase_admin().schema("jacomprei").table("shopping_lists").insert({
-            "user_id": user.id,
-            "title": payload.title.strip(),
-            "items": valid_items,
+        response = get_supabase_admin().rpc("jacomprei_create_shopping_list", {
+            "p_user_id": user.id,
+            "p_title": payload.title.strip(),
+            "p_items": valid_items,
         }).execute()
         return response.data[0]
     except Exception as exc:
@@ -219,11 +219,9 @@ async def get_shopping_lists(request: Request):
     """Return only the authenticated user's saved lists."""
     user = get_authenticated_user(request)
     try:
-        response = get_supabase_admin().schema("jacomprei").table("shopping_lists") \
-            .select("id,title,items,created_at") \
-            .eq("user_id", user.id) \
-            .order("created_at", desc=True) \
-            .execute()
+        response = get_supabase_admin().rpc("jacomprei_get_shopping_lists", {
+            "p_user_id": user.id,
+        }).execute()
         return response.data
     except Exception as exc:
         logger.exception("Failed to load shopping lists for user %s", user.id)
@@ -235,15 +233,13 @@ async def get_shopping_list(list_id: str, request: Request):
     """Return one saved list, enforcing ownership on the server."""
     user = get_authenticated_user(request)
     try:
-        response = get_supabase_admin().schema("jacomprei").table("shopping_lists") \
-            .select("id,title,items,created_at") \
-            .eq("id", list_id) \
-            .eq("user_id", user.id) \
-            .maybe_single() \
-            .execute()
+        response = get_supabase_admin().rpc("jacomprei_get_shopping_list", {
+            "p_user_id": user.id,
+            "p_list_id": list_id,
+        }).execute()
         if not response.data:
             raise HTTPException(status_code=404, detail="shopping_list_not_found")
-        return response.data
+        return response.data[0]
     except HTTPException:
         raise
     except Exception as exc:
@@ -256,11 +252,12 @@ async def delete_shopping_list(list_id: str, request: Request):
     """Delete one saved list, enforcing ownership on the server."""
     user = get_authenticated_user(request)
     try:
-        get_supabase_admin().schema("jacomprei").table("shopping_lists") \
-            .delete() \
-            .eq("id", list_id) \
-            .eq("user_id", user.id) \
-            .execute()
+        response = get_supabase_admin().rpc("jacomprei_delete_shopping_list", {
+            "p_user_id": user.id,
+            "p_list_id": list_id,
+        }).execute()
+        if not response.data:
+            raise HTTPException(status_code=404, detail="shopping_list_not_found")
     except Exception as exc:
         logger.exception("Failed to delete shopping list %s for user %s", list_id, user.id)
         raise HTTPException(status_code=500, detail="shopping_list_delete_failed") from exc
