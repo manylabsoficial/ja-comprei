@@ -136,7 +136,7 @@ export default function ShoppingList({ ingredients, onGenerate, onAddIngredient,
             </main>
 
             {/* Generate Button — pílula dourada fixa (safe-area) */}
-            <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-safe pt-4 bg-gradient-to-t from-surface-base via-surface-base/95 to-transparent">
+            <div className="fixed bottom-24 left-0 right-0 z-40 px-4 pt-4 bg-gradient-to-t from-surface-base via-surface-base/95 to-transparent">
                 <div className="flex justify-center w-full max-w-7xl mx-auto pb-4">
                     <button
                         onClick={handleGenerateClick}
