@@ -110,73 +110,71 @@ export const getSavedRecipes = async (userId) => {
 // === SHOPPING LIST PERSISTENCE ===
 
 export const saveShoppingList = async (userId, listTitle, items) => {
-    if (!userId) throw new Error('Usuário não autenticado');
+    if (!userId) throw new Error('User is not authenticated.');
 
-    const payload = {
-        user_id: userId,
-        title: listTitle || `Lista de Compras ${new Date().toLocaleDateString('pt-BR')}`,
-        items: items // JSONB
-    };
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Session expired. Sign in again to save the list.');
 
-    const { data, error } = await supabase.schema('jacomprei')
-        .from('shopping_lists')
-        .insert([payload])
-        .select();
+    // `jacomprei` is a private schema and is intentionally not exposed by Data API.
+    const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    const apiUrl = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api`;
+    const response = await fetch(`${apiUrl}/auth/shopping-lists`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            title: listTitle || `Lista de Compras ${new Date().toLocaleDateString('pt-BR')}`,
+            items,
+        }),
+    });
 
-    if (error) {
-        console.error('Erro ao salvar lista:', error);
-        throw error;
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'Unable to save the list.');
     }
 
-    return data;
+    return response.json();
 }
+
+const getShoppingListApiContext = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Session expired. Sign in again to access saved lists.');
+
+    const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    const apiUrl = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api`;
+    return { apiUrl, accessToken: session.access_token };
+};
+
+const shoppingListRequest = async (path = '', options = {}) => {
+    const { apiUrl, accessToken } = await getShoppingListApiContext();
+    const response = await fetch(`${apiUrl}/auth/shopping-lists${path}`, {
+        ...options,
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            ...(options.headers || {}),
+        },
+    });
+
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'Unable to complete the saved-list request.');
+    }
+
+    return response.status === 204 ? null : response.json();
+};
 
 export const getShoppingLists = async (userId) => {
-    if (!userId) throw new Error('Usuário não autenticado');
+    if (!userId) throw new Error('User is not authenticated.');
+    return shoppingListRequest();
+};
 
-    console.log('Fetching lists for user:', userId);
+export const getShoppingListById = async (listId) => shoppingListRequest(`/${encodeURIComponent(listId)}`);
 
-    const { data, error } = await supabase.schema('jacomprei')
-        .from('shopping_lists')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error('Erro ao buscar listas:', error);
-        throw error;
-    }
-
-    console.log('Lists found:', data);
-    return data;
-}
-
-export const deleteShoppingList = async (listId) => {
-    const { error } = await supabase.schema('jacomprei')
-        .from('shopping_lists')
-        .delete()
-        .eq('id', listId);
-
-    if (error) {
-        console.error('Erro ao deletar lista:', error);
-        throw error;
-    }
-}
-
-export const getShoppingListById = async (listId) => {
-    const { data, error } = await supabase.schema('jacomprei')
-        .from('shopping_lists')
-        .select('*')
-        .eq('id', listId)
-        .single();
-
-    if (error) {
-        console.error('Erro ao buscar lista por ID:', error);
-        throw error;
-    }
-
-    return data;
-}
+export const deleteShoppingList = async (listId) => shoppingListRequest(`/${encodeURIComponent(listId)}`, {
+    method: 'DELETE',
+});
 
 // === CREDITS SYSTEM ===
 
