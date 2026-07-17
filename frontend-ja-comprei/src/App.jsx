@@ -116,7 +116,7 @@ export default function App() {
     // 1. Check Credits
     if (user) {
       try {
-        const { allowed, isAdmin, balance } = await checkCredits(user.id);
+        const { allowed, balance } = await checkCredits(user.id);
         if (!allowed) {
           alert(`Saldo insuficiente (${balance} créditos). Assine o Pro para continuar!`);
           return;
@@ -135,25 +135,6 @@ export default function App() {
 
       if (result && result.receitas) {
         const recipesWithImages = result.receitas;
-
-        // Preload images with timeout (prevent eternal hanging)
-        await Promise.all(recipesWithImages.map(recipe => {
-          return new Promise((resolve) => {
-            if (!recipe.image_url) {
-              resolve();
-              return;
-            }
-            const img = new Image();
-            img.src = recipe.image_url;
-            img.onload = resolve;
-            img.onerror = resolve;
-
-            // Force resolve after 8 seconds if image is stuck
-            setTimeout(() => {
-              resolve();
-            }, 8000);
-          });
-        }));
 
         setRecipes(recipesWithImages);
 
