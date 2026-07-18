@@ -35,7 +35,7 @@ class AIOrchestrator:
             logger.error(f"Orchestrator Receipt Error: {e}")
             raise e
 
-    async def generate_recipes_with_images(self, ingredients: list[str], user_id: str = None) -> dict:
+    async def generate_recipes_with_images(self, ingredients: list[str], user_id: str = None, run_id: str | None = None) -> dict:
         """
         Runs the LangGraph State Machine to suggest creative recipes with images.
         Uses Roteador de Imagens Tríplice and self-correction.
@@ -45,7 +45,8 @@ class AIOrchestrator:
             
             inputs = {
                 "ingredients": ingredients,
-                "user_id": user_id
+                "user_id": user_id,
+                "run_id": run_id,
             }
             
             logger.info("Orchestrator: Invoking LangGraph Recipe Graph...")

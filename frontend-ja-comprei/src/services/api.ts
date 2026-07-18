@@ -10,6 +10,7 @@ export const api = {
         console.log(`[API REQUEST] Sugerindo receitas... URL: ${url}`);
 
         try {
+            const { data: { session } } = await supabase.auth.getSession();
             const controller = new AbortController();
             // Recipe text plus image generation may use a short provider fallback.
             // Keep this above the backend's bounded work instead of aborting a
@@ -20,9 +21,11 @@ export const api = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
                 },
                 body: JSON.stringify({
-                    ingredientes: ingredients.map(item => ({ item, quantidade: '' }))
+                    ingredientes: ingredients.map(item => ({ item, quantidade: '' })),
+                    user_id: session?.user?.id,
                 }),
                 signal: controller.signal
             }).finally(() => clearTimeout(timeoutId));
@@ -37,6 +40,34 @@ export const api = {
         } catch (error) {
             console.error("[API ERROR] sugerir-receitas:", error);
             throw error;
+        }
+    },
+
+    async trackImageRender(generationId: string, recipeIndex: number, eventType: 'image_loaded' | 'image_failed', imageUrl?: string) {
+        if (!generationId) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+
+        const provider = imageUrl?.startsWith('data:') ? 'openrouter' :
+            imageUrl?.includes('pollinations.ai') ? 'pollinations' : 'other';
+
+        try {
+            await fetch(`${API_URL}/generation-events`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                    generation_id: generationId,
+                    recipe_index: recipeIndex,
+                    event_type: eventType,
+                    provider,
+                }),
+            });
+        } catch (error) {
+            // Telemetry must never block the recipe experience.
+            console.warn('Unable to record image render telemetry:', error);
         }
     },
 
@@ -96,3 +127,4 @@ export const api = {
         }
     }
 };
+import { supabase } from '../lib/supabase';

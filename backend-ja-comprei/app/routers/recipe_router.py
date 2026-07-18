@@ -1,6 +1,11 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+import time
+from uuid import uuid4
+
+from fastapi import APIRouter, HTTPException, UploadFile, File, Request, status
 from pydantic import BaseModel
 from app.services.ai_orchestrator import ai_orchestrator
+from app.services.generation_observability import generation_observability
+from app.routers.auth_router import get_authenticated_user
 import json
 
 router = APIRouter(tags=["Receitas"])
@@ -13,17 +18,56 @@ class PedidoReceitas(BaseModel):
     ingredientes: list[IngredienteInput]
     user_id: str | None = None
 
+
+class ImageRenderEvent(BaseModel):
+    generation_id: str
+    recipe_index: int
+    event_type: str
+    provider: str | None = None
+
 @router.post("/sugerir-receitas")
-async def sugerir_receitas(pedido: PedidoReceitas):
+async def sugerir_receitas(pedido: PedidoReceitas, request: Request):
     # Extract just names for the AI
     lista_nomes = [i.item for i in pedido.ingredientes]
     print(f"Gerando receitas para: {lista_nomes}")
+    run_id = str(uuid4())
+    user_id = pedido.user_id
+    if request.headers.get("Authorization"):
+        user_id = get_authenticated_user(request).id
+
+    await generation_observability.create_run(run_id, user_id, len(lista_nomes))
+    generation_observability.event(run_id, "request_received", "api", metadata={"ingredient_count": len(lista_nomes)})
+    started = time.perf_counter()
     try:
         # Use Orchestrator to include Images and User Preferences
-        return await ai_orchestrator.generate_recipes_with_images(lista_nomes, user_id=pedido.user_id)
+        result = await ai_orchestrator.generate_recipes_with_images(lista_nomes, user_id=user_id, run_id=run_id)
+        result["generation_id"] = run_id
+        await generation_observability.finish_run(
+            run_id, "succeeded", int((time.perf_counter() - started) * 1000),
+            recipe_count=len(result.get("receitas", [])),
+        )
+        return result
     except Exception as e:
         print(f"Erro ao gerar receitas: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        await generation_observability.finish_run(
+            run_id, "failed", int((time.perf_counter() - started) * 1000), error=e,
+        )
+        raise HTTPException(status_code=500, detail="recipe_generation_failed") from e
+
+
+@router.post("/generation-events", status_code=status.HTTP_202_ACCEPTED)
+async def record_generation_image_event(event: ImageRenderEvent, request: Request):
+    """Record whether a recipe image actually rendered in the user's browser."""
+    user = get_authenticated_user(request)
+    if event.event_type not in {"image_loaded", "image_failed"}:
+        raise HTTPException(status_code=422, detail="invalid_generation_event")
+    recorded = await generation_observability.record_client_image_event(
+        event.generation_id, user.id, event.recipe_index, event.event_type,
+        {"provider": event.provider or "unknown"},
+    )
+    if not recorded:
+        raise HTTPException(status_code=404, detail="generation_run_not_found")
+    return {"ok": True}
 
 @router.post("/analisar-nota")
 async def analisar_nota(file: UploadFile = File(...)):

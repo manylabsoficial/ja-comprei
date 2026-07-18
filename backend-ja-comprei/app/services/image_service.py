@@ -1,9 +1,11 @@
 import logging
+import time
 
 import httpx
 
 from app.core.config import get_settings
 from app.services.pollinations_service import pollinations_service
+from app.services.generation_observability import generation_observability
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -69,9 +71,17 @@ The final image must look like an authentic, appetizing photograph of a dish som
         meal_type: str = "default",
         dish_name: str | None = None,
         ingredients: list[str] | None = None,
+        run_id: str | None = None,
+        recipe_index: int | None = None,
     ) -> str:
         """Return a data URL from OpenRouter or a Pollinations fallback URL."""
         full_prompt = self._build_full_prompt(visual_tag, meal_type, dish_name, ingredients)
+        started = time.perf_counter()
+
+        generation_observability.event(
+            run_id, "image_started", "image_generation", provider="openrouter",
+            model=settings.OPENROUTER_IMAGE_MODEL, recipe_index=recipe_index,
+        )
 
         if settings.OPENROUTER_API_KEY:
             try:
@@ -104,21 +114,52 @@ The final image must look like an authentic, appetizing photograph of a dish som
                             if base64_image:
                                 media_type = image_data.get("media_type", "image/png")
                                 logger.info("ImageService: OpenRouter succeeded.")
+                                generation_observability.event(
+                                    run_id, "image_completed", "image_generation", provider="openrouter",
+                                    model=settings.OPENROUTER_IMAGE_MODEL, recipe_index=recipe_index,
+                                    duration_ms=int((time.perf_counter() - started) * 1000),
+                                    metadata={"payload": "data_url", "media_type": media_type},
+                                )
                                 return f"data:{media_type};base64,{base64_image}"
 
                             image_url = image_data.get("url")
                             if image_url:
                                 logger.info("ImageService: OpenRouter succeeded with a hosted URL.")
+                                generation_observability.event(
+                                    run_id, "image_completed", "image_generation", provider="openrouter",
+                                    model=settings.OPENROUTER_IMAGE_MODEL, recipe_index=recipe_index,
+                                    duration_ms=int((time.perf_counter() - started) * 1000),
+                                    metadata={"payload": "remote_url"},
+                                )
                                 return image_url
 
                         logger.warning("ImageService: OpenRouter returned no usable image payload.")
+                        generation_observability.event(run_id, "image_provider_failed", "image_generation",
+                                                       level="warning", provider="openrouter",
+                                                       model=settings.OPENROUTER_IMAGE_MODEL, recipe_index=recipe_index,
+                                                       error="empty_image_payload")
                     else:
                         logger.warning("ImageService: OpenRouter failed with status %s: %s", response.status_code, response.text)
+                        generation_observability.event(run_id, "image_provider_failed", "image_generation",
+                                                       level="warning", provider="openrouter",
+                                                       model=settings.OPENROUTER_IMAGE_MODEL, recipe_index=recipe_index,
+                                                       error=f"http_{response.status_code}")
             except Exception as exc:
                 logger.warning("ImageService: OpenRouter raised exception: %r", exc)
+                generation_observability.event(run_id, "image_provider_failed", "image_generation",
+                                               level="warning", provider="openrouter",
+                                               model=settings.OPENROUTER_IMAGE_MODEL, recipe_index=recipe_index,
+                                               error=exc)
 
         logger.info("ImageService: Falling back to Pollinations AI.")
-        return pollinations_service.get_ghibli_url(full_prompt, meal_type=meal_type)
+        fallback_url = pollinations_service.get_ghibli_url(full_prompt, meal_type=meal_type)
+        generation_observability.event(
+            run_id, "image_fallback", "image_generation", provider="pollinations",
+            model=settings.POLLINATIONS_MODEL, recipe_index=recipe_index,
+            duration_ms=int((time.perf_counter() - started) * 1000),
+            metadata={"reason": "openrouter_unavailable", "payload": "remote_url"},
+        )
+        return fallback_url
 
 
 image_service = ImageService()

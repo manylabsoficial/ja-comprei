@@ -134,7 +134,11 @@ export default function App() {
       const result = await api.sugerirReceitas(ingredientNames);
 
       if (result && result.receitas) {
-        const recipesWithImages = result.receitas;
+        const recipesWithImages = result.receitas.map((recipe, index) => ({
+          ...recipe,
+          generation_id: result.generation_id,
+          generation_recipe_index: index,
+        }));
 
         setRecipes(recipesWithImages);
 

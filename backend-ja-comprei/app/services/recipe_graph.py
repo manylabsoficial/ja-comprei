@@ -1,6 +1,7 @@
 import logging
 import json
 import asyncio
+import time
 from typing import List, Dict, Any, Optional
 from typing_extensions import TypedDict
 from pydantic import ValidationError
@@ -15,6 +16,7 @@ from app.prompts.chef_v2 import CHEF_SYSTEM_PROMPT
 from app.utils.sanitize import sanitize_ingredient_list
 from app.schemas import ReceitasResponse
 from app.services.image_service import image_service
+from app.services.generation_observability import generation_observability
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ class RecipeState(TypedDict):
     # Inputs
     ingredients: List[str]
     user_id: Optional[str]
+    run_id: Optional[str]
     
     # Compiled context
     user_preferences: Optional[str]
@@ -370,6 +373,8 @@ async def generate_images_parallel_node(state: RecipeState) -> Dict[str, Any]:
             meal_type=meal_type,
             dish_name=recipe.get("nome_do_prato"),
             ingredients=recipe.get("ingredientes_usados", []),
+            run_id=state.get("run_id"),
+            recipe_index=index,
         ))
         
     # Execute concurrently
@@ -409,6 +414,36 @@ async def aggregate_and_respond_node(state: RecipeState) -> Dict[str, Any]:
         "recipes_data": recipes_data
     }
 
+
+def observed_node(node_name: str, handler):
+    """Add timing and outcome events around every LangGraph node."""
+    async def wrapped(state: RecipeState) -> Dict[str, Any]:
+        run_id = state.get("run_id")
+        generation_observability.event(run_id, "node_started", node_name)
+        started = time.perf_counter()
+        try:
+            result = await handler(state)
+            duration_ms = int((time.perf_counter() - started) * 1000)
+            generation_observability.event(
+                run_id, "node_completed", node_name,
+                provider=result.get("provider") or state.get("provider"),
+                model=result.get("active_model") or state.get("active_model"),
+                duration_ms=duration_ms,
+                metadata={
+                    "is_valid": result.get("is_valid"),
+                    "attempt_count": result.get("attempt_count", state.get("attempt_count")),
+                },
+            )
+            return result
+        except Exception as exc:
+            generation_observability.event(
+                run_id, "node_failed", node_name, level="error",
+                provider=state.get("provider"), model=state.get("active_model"),
+                duration_ms=int((time.perf_counter() - started) * 1000), error=exc,
+            )
+            raise
+    return wrapped
+
 # --- EDGES & ROUTERS ---
 
 def router_after_validation(state: RecipeState) -> str:
@@ -435,13 +470,13 @@ def router_after_validation(state: RecipeState) -> str:
 workflow = StateGraph(RecipeState)
 
 # Define Nodes
-workflow.add_node("prepare_context", prepare_context_node)
-workflow.add_node("generate_recipes_deepseek", generate_recipes_deepseek_node)
-workflow.add_node("generate_recipes_groq", generate_recipes_groq_node)
-workflow.add_node("validate_recipes", validate_recipes_node)
-workflow.add_node("correct_recipes", correct_recipes_node)
-workflow.add_node("generate_images_parallel", generate_images_parallel_node)
-workflow.add_node("aggregate_and_respond", aggregate_and_respond_node)
+workflow.add_node("prepare_context", observed_node("prepare_context", prepare_context_node))
+workflow.add_node("generate_recipes_deepseek", observed_node("generate_recipes_deepseek", generate_recipes_deepseek_node))
+workflow.add_node("generate_recipes_groq", observed_node("generate_recipes_groq", generate_recipes_groq_node))
+workflow.add_node("validate_recipes", observed_node("validate_recipes", validate_recipes_node))
+workflow.add_node("correct_recipes", observed_node("correct_recipes", correct_recipes_node))
+workflow.add_node("generate_images_parallel", observed_node("generate_images_parallel", generate_images_parallel_node))
+workflow.add_node("aggregate_and_respond", observed_node("aggregate_and_respond", aggregate_and_respond_node))
 
 # Define Entry Point
 workflow.set_entry_point("prepare_context")

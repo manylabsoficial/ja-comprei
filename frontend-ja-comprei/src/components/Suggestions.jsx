@@ -1,5 +1,68 @@
 import { useState } from 'react';
 import { Search, Clock, ChefHat, User, QrCode, BookOpen, Flame, Leaf, Eye, X } from 'lucide-react';
+import { api } from '../services/api';
+
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80';
+
+function RecipeCard({ recipe, index, onSelectRecipe, setSelectedPrompt }) {
+    const source = recipe.image_url || recipe.image || DEFAULT_IMAGE;
+    const [imageSource, setImageSource] = useState(source);
+    const [renderEventSent, setRenderEventSent] = useState(false);
+
+    const recordRender = (eventType) => {
+        if (renderEventSent || !recipe.generation_id) return;
+        setRenderEventSent(true);
+        api.trackImageRender(recipe.generation_id, recipe.generation_recipe_index ?? index, eventType, source);
+    };
+
+    return (
+        <article
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelectRecipe(recipe, index)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectRecipe(recipe, index); }}
+            className="group relative flex flex-col aspect-[4/5] overflow-hidden rounded-[2rem] shadow-sm transition-all duration-300 hover:shadow-xl cursor-pointer"
+        >
+            <img
+                src={imageSource}
+                alt={recipe.title || recipe.nome_do_prato || 'Receita sugerida'}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                onLoad={() => recordRender('image_loaded')}
+                onError={() => {
+                    recordRender('image_failed');
+                    if (imageSource !== DEFAULT_IMAGE) setImageSource(DEFAULT_IMAGE);
+                }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/30 to-transparent"></div>
+
+            {import.meta.env.DEV && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedPrompt(recipe.descricao_imagem || "Prompt indisponível"); }}
+                    className="absolute top-4 left-4 p-2 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:bg-black/60 hover:text-white transition-all z-20"
+                    title="Ver Prompt da Imagem"
+                >
+                    <Eye size={16} />
+                </button>
+            )}
+
+            {recipe.tag && (
+                <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-gold-500 px-3 py-1.5 text-xs font-bold text-on-gold shadow-sm">
+                    {recipe.tag === 'Saudável' ? <Leaf size={14} className="fill-current" /> : <Flame size={14} className="fill-current" />}
+                    {recipe.tag}
+                </div>
+            )}
+
+            <div className="relative mt-auto flex flex-col gap-2 p-6 text-text-primary">
+                <h3 className="text-2xl font-bold leading-tight">{recipe.title || recipe.nome_do_prato}</h3>
+                <div className="flex items-center gap-5 text-sm font-medium text-text-secondary">
+                    <div className="flex items-center gap-1.5"><Clock size={18} className="text-gold-500" /><span>{recipe.time || recipe.tempo_preparo}</span></div>
+                    <div className="h-1 w-1 rounded-full bg-text-tertiary"></div>
+                    <div className="flex items-center gap-1.5"><ChefIcon size={18} className="text-gold-500" /><span>{recipe.difficulty || 'Fácil'}</span></div>
+                </div>
+            </div>
+        </article>
+    );
+}
 
 export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
     const [selectedPrompt, setSelectedPrompt] = useState(null);
@@ -30,62 +93,8 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
 
                 <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
                     {recipes.map((recipe, index) => (
-                        <article
-                            key={recipe.id || index}
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => onSelectRecipe(recipe, index)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectRecipe(recipe, index); }}
-                            className="group relative flex flex-col aspect-[4/5] overflow-hidden rounded-[2rem] shadow-sm transition-all duration-300 hover:shadow-xl cursor-pointer"
-                        >
-                            {/* Imagem grande — a comida ocupa o card inteiro */}
-                            <div
-                                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                style={{ backgroundImage: `url('${recipe.image_url || recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'}')` }}
-                            ></div>
-                            {/* Gradiente escuro subindo — o chrome some, a comida fala */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/30 to-transparent"></div>
-
-                            {/* Prompt Debug Button — apenas em dev */}
-                            {import.meta.env.DEV && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedPrompt(recipe.descricao_imagem || "Prompt indisponível");
-                                    }}
-                                    className="absolute top-4 left-4 p-2 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:bg-black/60 hover:text-white transition-all z-20"
-                                    title="Ver Prompt da Imagem"
-                                >
-                                    <Eye size={16} />
-                                </button>
-                            )}
-
-                            {/* Badge dourado */}
-                            {recipe.tag && (
-                                <div className="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-gold-500 px-3 py-1.5 text-xs font-bold text-on-gold shadow-sm">
-                                    {recipe.tag === 'Saudável' ? <Leaf size={14} className="fill-current" /> : <Flame size={14} className="fill-current" />}
-                                    {recipe.tag}
-                                </div>
-                            )}
-
-                            {/* Título + meta sobre a foto */}
-                            <div className="relative mt-auto flex flex-col gap-2 p-6 text-text-primary">
-                                <h3 className="text-2xl font-bold leading-tight">
-                                    {recipe.title || recipe.nome_do_prato}
-                                </h3>
-                                <div className="flex items-center gap-5 text-sm font-medium text-text-secondary">
-                                    <div className="flex items-center gap-1.5">
-                                        <Clock size={18} className="text-gold-500" />
-                                        <span>{recipe.time || recipe.tempo_preparo}</span>
-                                    </div>
-                                    <div className="h-1 w-1 rounded-full bg-text-tertiary"></div>
-                                    <div className="flex items-center gap-1.5">
-                                        <ChefIcon size={18} className="text-gold-500" />
-                                        <span>{recipe.difficulty || 'Fácil'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
+                        <RecipeCard key={recipe.generation_id ? `${recipe.generation_id}-${index}` : (recipe.id || index)} recipe={recipe} index={index}
+                            onSelectRecipe={onSelectRecipe} setSelectedPrompt={setSelectedPrompt} />
                     ))}
                 </div>
             </main>
