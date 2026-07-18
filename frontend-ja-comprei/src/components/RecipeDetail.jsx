@@ -61,7 +61,7 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
 
     if (!Array.isArray(steps)) steps = [];
 
-    const image = recipe.image_url || recipe.image || 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=80';
+    const [imageSource, setImageSource] = useState(recipe.image_url || recipe.image || null);
 
     // Tags logic
     const tags = recipe.tags || ['Popular', 'Spicy'];
@@ -83,10 +83,19 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
 
                 {/* Hero Image */}
                 <div className="absolute inset-0 w-full h-full bg-surface-sunken">
-                    <div
-                        className="w-full h-full bg-cover bg-center"
-                        style={{ backgroundImage: `url('${image}')` }}
-                    ></div>
+                    {imageSource ? (
+                        <img
+                            src={imageSource}
+                            alt={title || 'Receita sugerida'}
+                            className="w-full h-full object-cover"
+                            onError={() => setImageSource(null)}
+                        />
+                    ) : (
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#3a2d1a] via-[#1d1811] to-surface-base text-text-secondary">
+                            <ChefHat size={42} className="text-gold-500/80" />
+                            <span className="text-sm font-medium">Imagem da receita indisponível</span>
+                        </div>
+                    )}
                     <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-surface-base to-transparent md:hidden"></div>
                 </div>
             </div>

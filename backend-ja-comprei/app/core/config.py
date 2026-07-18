@@ -27,8 +27,15 @@ class Settings(BaseSettings):
     POLLINATIONS_MODEL: str = "flux"
     
     # OpenRouter Image Model
-    OPENROUTER_IMAGE_MODEL: str = "openai/gpt-image-2"
-    OPENROUTER_IMAGE_QUALITY: str = "medium"
+    # Nano Banana 2 Lite: fast 1K food images through the OpenRouter Image API.
+    OPENROUTER_IMAGE_MODEL: str = "google/gemini-3.1-flash-lite-image"
+    OPENROUTER_IMAGE_QUALITY: str | None = None
+    OPENROUTER_IMAGE_TIMEOUT_SECONDS: float = 15.0
+    OPENROUTER_IMAGE_ASPECT_RATIO: str = "4:5"
+    OPENROUTER_IMAGE_RESOLUTION: str = "1K"
+    OPENROUTER_IMAGE_FALLBACK_MODEL: str = "openai/gpt-image-1-mini"
+    OPENROUTER_IMAGE_FALLBACK_QUALITY: str = "medium"
+    OPENROUTER_IMAGE_FALLBACK_TIMEOUT_SECONDS: float = 20.0
 
     # Supabase Settings
     SUPABASE_URL: str

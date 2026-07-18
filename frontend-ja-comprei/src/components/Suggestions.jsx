@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { Search, Clock, ChefHat, User, QrCode, BookOpen, Flame, Leaf, Eye, X } from 'lucide-react';
 import { api } from '../services/api';
 
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80';
-
 function RecipeCard({ recipe, index, onSelectRecipe, setSelectedPrompt }) {
-    const source = recipe.image_url || recipe.image || DEFAULT_IMAGE;
+    const source = recipe.image_url || recipe.image || null;
     const [imageSource, setImageSource] = useState(source);
     const [renderEventSent, setRenderEventSent] = useState(false);
 
@@ -23,16 +21,23 @@ function RecipeCard({ recipe, index, onSelectRecipe, setSelectedPrompt }) {
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectRecipe(recipe, index); }}
             className="group relative flex flex-col aspect-[4/5] overflow-hidden rounded-[2rem] shadow-sm transition-all duration-300 hover:shadow-xl cursor-pointer"
         >
-            <img
-                src={imageSource}
-                alt={recipe.title || recipe.nome_do_prato || 'Receita sugerida'}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                onLoad={() => recordRender('image_loaded')}
-                onError={() => {
-                    recordRender('image_failed');
-                    if (imageSource !== DEFAULT_IMAGE) setImageSource(DEFAULT_IMAGE);
-                }}
-            />
+            {imageSource ? (
+                <img
+                    src={imageSource}
+                    alt={recipe.title || recipe.nome_do_prato || 'Receita sugerida'}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    onLoad={() => recordRender('image_loaded')}
+                    onError={() => {
+                        recordRender('image_failed');
+                        setImageSource(null);
+                    }}
+                />
+            ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#3a2d1a] via-[#1d1811] to-surface-base px-8 text-center text-text-secondary">
+                    <ChefHat size={38} className="text-gold-500/80" />
+                    <span className="text-sm font-medium">Imagem da receita indisponível</span>
+                </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-surface-base via-surface-base/30 to-transparent"></div>
 
             {import.meta.env.DEV && (

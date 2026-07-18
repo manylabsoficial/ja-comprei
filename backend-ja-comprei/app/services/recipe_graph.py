@@ -384,11 +384,7 @@ async def generate_images_parallel_node(state: RecipeState) -> Dict[str, Any]:
     for index, img_res in enumerate(results):
         if isinstance(img_res, Exception):
             logger.error(f"RecipeGraph: Image generation failed for recipe {index}: {img_res}")
-            # Fallback URL on failure
-            from app.services.pollinations_service import pollinations_service
-            recipe = recipes_list[index]
-            fallback_url = pollinations_service.get_ghibli_url(recipe.get("visual_tag", "Delicious food"))
-            recipe_images[index] = fallback_url
+            recipe_images[index] = ""
         else:
             recipe_images[index] = img_res
             
