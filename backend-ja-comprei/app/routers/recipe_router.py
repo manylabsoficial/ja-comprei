@@ -2,10 +2,10 @@ import time
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.ai_orchestrator import ai_orchestrator
 from app.services.generation_observability import generation_observability
-from app.routers.auth_router import get_authenticated_user
+from app.routers.auth_router import get_authenticated_user, get_supabase_admin
 import json
 
 router = APIRouter(tags=["Receitas"])
@@ -24,6 +24,69 @@ class ImageRenderEvent(BaseModel):
     recipe_index: int
     event_type: str
     provider: str | None = None
+
+
+class SavedRecipeCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=300)
+    slug: str = Field(min_length=1, max_length=380)
+    ingredients: list = Field(default_factory=list)
+    instructions: list = Field(default_factory=list)
+    visual_tag: str | None = Field(default=None, max_length=1000)
+    image_url: str | None = None
+    is_public: bool = False
+
+
+@router.post("/recipes", status_code=status.HTTP_201_CREATED)
+async def save_recipe(payload: SavedRecipeCreate, request: Request):
+    """Save a recipe for the authenticated user without exposing the private schema."""
+    user = get_authenticated_user(request)
+    try:
+        response = get_supabase_admin().rpc("jacomprei_save_recipe", {
+            "p_user_id": user.id,
+            "p_title": payload.title,
+            "p_slug": payload.slug,
+            "p_ingredients": payload.ingredients,
+            "p_instructions": payload.instructions,
+            "p_visual_tag": payload.visual_tag,
+            "p_image_url": payload.image_url,
+            "p_is_public": payload.is_public,
+        }).execute()
+        return response.data[0]
+    except Exception as exc:
+        print(f"Erro ao salvar receita para {user.id}: {exc}")
+        raise HTTPException(status_code=500, detail="recipe_save_failed") from exc
+
+
+@router.get("/recipes")
+async def get_saved_recipes(request: Request):
+    """Return recipes owned by the authenticated user."""
+    user = get_authenticated_user(request)
+    try:
+        return get_supabase_admin().rpc("jacomprei_get_saved_recipes", {
+            "p_user_id": user.id,
+        }).execute().data
+    except Exception as exc:
+        print(f"Erro ao buscar receitas para {user.id}: {exc}")
+        raise HTTPException(status_code=500, detail="recipe_list_load_failed") from exc
+
+
+@router.get("/recipes/{slug}")
+async def get_saved_recipe(slug: str, request: Request):
+    """Return an owned recipe, or a recipe explicitly marked public."""
+    user = get_authenticated_user(request)
+    try:
+        data = get_supabase_admin().rpc("jacomprei_get_saved_recipe", {
+            "p_user_id": user.id,
+            "p_slug": slug,
+        }).execute().data
+        if not data:
+            raise HTTPException(status_code=404, detail="recipe_not_found")
+        return data[0]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"Erro ao buscar receita {slug}: {exc}")
+        raise HTTPException(status_code=500, detail="recipe_load_failed") from exc
 
 @router.post("/sugerir-receitas")
 async def sugerir_receitas(pedido: PedidoReceitas, request: Request):

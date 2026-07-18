@@ -50,61 +50,61 @@ export const saveRecipeToSupabase = async (recipe, userId) => {
         instructions: recipe.modo_de_preparo || recipe.steps || recipe.instructions || [],    // JSONB: Robust fallback
         visual_tag: recipe.visual_tag,
         image_url: recipe.image_url,
-        user_id: userId,
         is_public: false
     }
 
-    const { data, error } = await supabase.schema('jacomprei')
-        .from('recipes')
-        .insert([payload])
-        .select()
-
-    if (error) {
-        console.error('Erro ao salvar receita no Supabase:', error)
-        throw error
+    const { apiUrl, accessToken } = await getAuthenticatedApiContext();
+    const response = await fetch(`${apiUrl}/recipes`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'recipe_save_failed');
     }
+    const data = await response.json();
 
     // Retorna dados com slug para redirecionamento
-    const result = { ...data[0], slug };
+    const result = data;
 
     // Trigger metadata extraction (non-blocking)
-    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
-    fetch(`${API_BASE}/api/recipes/${result.id}/extract-metadata`, { method: 'POST' })
+    fetch(`${apiUrl}/recipes/${result.id}/extract-metadata`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+    })
         .catch(e => console.warn('Metadata extraction trigger failed (non-blocking):', e));
 
     return result;
 }
 
 export const getRecipeBySlug = async (slug) => {
-    const { data, error } = await supabase.schema('jacomprei')
-        .from('recipes')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-    if (error) {
-        console.error('Erro ao buscar receita por slug:', error);
-        throw error;
+    const { apiUrl, accessToken } = await getAuthenticatedApiContext();
+    const response = await fetch(`${apiUrl}/recipes/${encodeURIComponent(slug)}`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'recipe_load_failed');
     }
-
-    return data;
+    return response.json();
 }
 
 export const getSavedRecipes = async (userId) => {
     if (!userId) throw new Error('Usuário não autenticado')
 
-    const { data, error } = await supabase.schema('jacomprei')
-        .from('recipes')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-
-    if (error) {
-        console.error('Erro ao buscar receitas salvas:', error)
-        throw error
+    const { apiUrl, accessToken } = await getAuthenticatedApiContext();
+    const response = await fetch(`${apiUrl}/recipes`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+    if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.detail || 'recipe_list_load_failed');
     }
-
-    return data
+    return response.json();
 }
 
 // === SHOPPING LIST PERSISTENCE ===
