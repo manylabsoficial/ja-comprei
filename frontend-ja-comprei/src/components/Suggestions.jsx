@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Clock, ChefHat, User, QrCode, BookOpen, Flame, Leaf, Eye, X } from 'lucide-react';
+import { ArrowLeft, Clock, ChefHat, Flame, Leaf, Eye, X } from 'lucide-react';
 import { api } from '../services/api';
 
 function RecipeCard({ recipe, index, onSelectRecipe, setSelectedPrompt }) {
@@ -77,14 +77,12 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
             {/* Header */}
             <header className="sticky top-0 z-40 flex items-center justify-between bg-surface-base/90 backdrop-blur-md px-6 py-4 border-b border-border-subtle md:rounded-t-3xl md:border-x md:border-t">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-gold-500">
-                        <UtensilsIcon size={24} />
-                    </div>
+                    <button onClick={onBack} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-raised text-text-secondary transition-colors hover:text-gold-500">
+                        <ArrowLeft size={20} />
+                    </button>
                     <h1 className="text-xl font-bold tracking-tight">Sugestões do Chef</h1>
                 </div>
-                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-transparent hover:bg-surface-hover transition-colors">
-                    <Search size={24} />
-                </button>
+                <div className="h-10 w-10" aria-hidden="true" />
             </header>
 
             {/* Scrollable Content */}
@@ -144,27 +142,6 @@ export default function Suggestions({ recipes, onSelectRecipe, onBack }) {
             )}
         </div>
     );
-}
-
-// Helper icons components to map close to material symbols
-function UtensilsIcon({ size = 24, className }) {
-    return (
-        <svg
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
-            <path d="M7 2v20" />
-            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
-        </svg>
-    )
 }
 
 function ChefIcon({ size = 24, className }) {

@@ -62,8 +62,8 @@ export default function ProfilePage() {
 
     if (!user) {
         return (
-            <div className="flex h-screen items-center justify-center bg-cream dark:bg-[#171b19]">
-                <p className="text-gray-500">Carregando perfil...</p>
+            <div className="flex min-h-dvh items-center justify-center bg-surface-base">
+                <p className="text-text-tertiary">Carregando perfil...</p>
             </div>
         );
     }
@@ -77,24 +77,25 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-cream dark:bg-[#171b19] text-charcoal dark:text-gray-100 pb-32">
+        <div className="min-h-screen bg-surface-base text-text-primary pb-32 lg:pb-12">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-cream/90 dark:bg-[#171b19]/90 backdrop-blur-md px-6 py-5 border-b border-gray-100 dark:border-white/5 md:hidden">
-                <h1 className="text-xl font-bold tracking-tight text-center">Meu Perfil</h1>
+            <header className="sticky top-0 z-40 bg-surface-base/90 backdrop-blur-md px-5 py-4 border-b border-border-subtle md:hidden">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gold-500">Conta</p>
+                <h1 className="text-lg font-extrabold tracking-tight">Meu perfil</h1>
             </header>
 
-            <main className="px-6 py-8 max-w-2xl mx-auto md:pt-12">
+            <main className="px-5 py-7 max-w-6xl mx-auto sm:px-7 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start lg:gap-x-8 lg:px-8 lg:pt-8">
 
                 {/* Profile Card */}
-                <div className="flex flex-col items-center gap-4 mb-10">
+                <div className="flex flex-col items-center gap-4 mb-10 lg:sticky lg:top-28 lg:row-span-3 lg:mb-0 lg:rounded-[28px] lg:border lg:border-border-subtle lg:bg-surface-raised lg:p-8">
                     <div className="relative">
-                        <div className="flex items-center justify-center w-24 h-24 rounded-full bg-terracotta/10 dark:bg-terracotta/20 text-terracotta">
+                        <div className="flex items-center justify-center w-24 h-24 rounded-full bg-gold-500/10 text-gold-500">
                             <User size={40} />
                         </div>
-                        <div className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-[#232a26] rounded-full shadow-md">
+                        <div className="absolute bottom-0 right-0 p-1.5 bg-surface-overlay rounded-full shadow-md">
                             <button
                                 onClick={handleEditProfile}
-                                className="flex items-center justify-center w-8 h-8 rounded-full bg-[#E07A5F] text-white hover:bg-[#d06045] transition-colors"
+                                className="flex items-center justify-center w-8 h-8 rounded-full bg-gold-500 text-on-gold hover:bg-gold-400 transition-colors"
                             >
                                 <Edit2 size={14} />
                             </button>
@@ -104,7 +105,7 @@ export default function ProfilePage() {
                         <h2 className="text-2xl font-bold font-serif">{user.email?.split('@')[0]}</h2>
                         <div className="flex flex-col items-center gap-1">
                             <p className="text-sm text-gray-500 dark:text-gray-400 font-sans">{user.email}</p>
-                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-sage/20 text-sage border border-sage/30">
+                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-gold-500/10 text-gold-400 border border-border-gold">
                                 {roleLabels[stats.role] || stats.role}
                             </span>
                         </div>
@@ -112,8 +113,8 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-10">
-                    <div className="col-span-2 p-6 rounded-2xl bg-gradient-to-br from-terracotta to-orange-600 shadow-lg text-white mb-2">
+                <div className="grid grid-cols-2 gap-4 mb-10 lg:col-start-2">
+                    <div className="col-span-2 p-6 rounded-2xl bg-gradient-to-br from-gold-500 to-gold-700 shadow-lg shadow-gold-500/15 text-on-gold mb-2">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium opacity-90">Créditos Disponíveis</span>
                             <User size={18} className="opacity-75" />
@@ -128,28 +129,28 @@ export default function ProfilePage() {
 
                     <button
                         onClick={() => navigate('/minhas-receitas')}
-                        className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-white dark:bg-[#232a26] shadow-sm border border-gray-100 dark:border-white/5 hover:scale-[1.02] transition-transform"
+                        className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-surface-raised shadow-sm border border-border-subtle hover:border-border-gold hover:scale-[1.02] transition-all"
                     >
-                        <Heart size={28} className="text-[#E07A5F]" />
+                        <Heart size={28} className="text-gold-500" />
                         <span className="text-2xl font-bold">{loading ? '-' : stats.recipes}</span>
                         <span className="text-xs text-gray-400 uppercase tracking-wider font-bold">Receitas</span>
                     </button>
                     <button
                         onClick={() => navigate('/minhas-listas')}
-                        className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-white dark:bg-[#232a26] shadow-sm border border-gray-100 dark:border-white/5 hover:scale-[1.02] transition-transform"
+                        className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl bg-surface-raised shadow-sm border border-border-subtle hover:border-border-gold hover:scale-[1.02] transition-all"
                     >
-                        <ShoppingBag size={28} className="text-[#81B29A]" />
+                        <ShoppingBag size={28} className="text-gold-500" />
                         <span className="text-2xl font-bold">{loading ? '-' : stats.lists}</span>
                         <span className="text-xs text-gray-400 uppercase tracking-wider font-bold">Listas</span>
                     </button>
                 </div>
 
                 {/* Menu Options */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3 lg:col-start-2">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Configurações</h3>
 
                     {/* Preferences Accordion */}
-                    <div className="rounded-2xl bg-white dark:bg-[#232a26] shadow-sm border border-gray-100 dark:border-white/5 overflow-hidden">
+                    <div className="rounded-2xl bg-surface-raised shadow-sm border border-border-subtle overflow-hidden">
                         <button
                             onClick={() => setPreferencesOpen(!preferencesOpen)}
                             className="flex items-center justify-between w-full p-4 transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
@@ -189,7 +190,7 @@ export default function ProfilePage() {
 
                     <button
                         onClick={handleLogout}
-                        className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-[#232a26] shadow-sm border border-gray-100 dark:border-white/5 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10 group mt-4 text-red-500"
+                        className="flex items-center justify-between p-4 rounded-2xl bg-surface-raised shadow-sm border border-border-subtle transition-colors hover:bg-danger/10 group mt-4 text-danger"
                     >
                         <div className="flex items-center gap-4">
                             <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-500">
@@ -201,7 +202,7 @@ export default function ProfilePage() {
                     </button>
                 </div>
 
-                <div className="mt-12 text-center">
+                <div className="mt-12 text-center lg:col-start-2">
                     <p className="text-xs text-gray-400">Versão 1.0.0 (Beta)</p>
                 </div>
             </main>

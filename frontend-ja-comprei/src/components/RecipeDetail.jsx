@@ -10,6 +10,7 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
     const navigate = useNavigate();
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [imageSource, setImageSource] = useState(recipe?.image_url || recipe?.image || null);
 
     const handleSave = async () => {
         if (!user) {
@@ -61,16 +62,14 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
 
     if (!Array.isArray(steps)) steps = [];
 
-    const [imageSource, setImageSource] = useState(recipe.image_url || recipe.image || null);
-
     // Tags logic
     const tags = recipe.tags || ['Popular', 'Spicy'];
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden group/design-root bg-surface-base text-text-primary font-sans transition-colors duration-300 md:fixed md:inset-0 md:flex-row md:overflow-hidden">
+        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden group/design-root bg-surface-base text-text-primary font-sans transition-colors duration-300 lg:grid lg:min-h-[calc(100vh-5rem)] lg:grid-cols-[minmax(360px,0.9fr)_minmax(500px,1.1fr)]">
 
             {/* Hero Section — full-bleed, funde no fundo escuro */}
-            <div className="relative w-full h-[40vh] min-h-[320px] md:h-full md:w-1/2 md:shrink-0">
+            <div className="relative w-full h-[40vh] min-h-[320px] lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:min-h-0">
                 {/* Nav Overlay */}
                 <div className="absolute top-0 left-0 w-full z-20 flex items-center justify-between p-4 pt-12 bg-gradient-to-b from-black/40 to-transparent">
                     <button onClick={onBack} className="flex size-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-colors">
@@ -96,16 +95,16 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
                             <span className="text-sm font-medium">Imagem da receita indisponível</span>
                         </div>
                     )}
-                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-surface-base to-transparent md:hidden"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-surface-base to-transparent lg:hidden"></div>
                 </div>
             </div>
 
             {/* Right Column Wrapper (Desktop) */}
-            <div className="relative flex flex-col md:w-1/2 md:h-full bg-surface-base">
+            <div className="relative flex min-w-0 flex-col bg-surface-base">
 
                 {/* Desktop Floating Save Button */}
                 {!isSavedView && !saved && (
-                    <div className="absolute top-6 right-8 z-30 hidden md:block">
+                    <div className="absolute top-8 right-8 z-30 hidden lg:block">
                         <button
                             onClick={handleSave}
                             disabled={saving}
@@ -120,9 +119,9 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
                 )}
 
                 {/* Main Content (Scrollable on Desktop) */}
-                <div className="relative px-6 -mt-8 z-10 flex flex-col gap-8 pb-32 md:mt-0 md:h-full md:overflow-y-auto md:px-12 md:pt-12 md:pb-32">
+                <div className="relative px-6 -mt-8 z-10 flex flex-col gap-8 pb-32 lg:mt-0 lg:px-10 lg:pt-10 lg:pb-16 xl:px-12">
                     {/* Title Header */}
-                    <div className="flex flex-col gap-2 md:pr-32"> {/* Added padding-right to avoid overlap with floating button */}
+                    <div className="flex flex-col gap-2 lg:pr-32"> {/* Added padding-right to avoid overlap with floating button */}
                         <div className="flex items-center gap-2 mb-1">
                             {tags.map((tag, idx) => (
                                 <span key={idx} className="px-3 py-1 text-sm font-bold rounded-full border bg-gold-500/10 text-gold-500 border-gold-500/30">
@@ -210,7 +209,7 @@ export default function RecipeDetail({ recipe, onBack, isSavedView = false }) {
 
                     {/* Mobile Save Action Button (Hidden on Desktop) */}
                     {!isSavedView && !saved && (
-                        <div className="mt-6 flex justify-center w-full md:hidden">
+                        <div className="mt-6 flex justify-center w-full lg:hidden">
                             <button
                                 onClick={handleSave}
                                 disabled={saving}

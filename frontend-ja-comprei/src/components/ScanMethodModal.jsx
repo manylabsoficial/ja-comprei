@@ -4,7 +4,7 @@ export default function ScanMethodModal({ isOpen, onClose, onSelectGallery, onSe
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center p-4 pb-6">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -12,16 +12,19 @@ export default function ScanMethodModal({ isOpen, onClose, onSelectGallery, onSe
             ></div>
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-[#FDFBF7] dark:bg-[#171c19] shadow-2xl transition-all animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+            <div className="relative w-full max-w-sm overflow-hidden rounded-t-[28px] border border-border-subtle bg-surface-overlay shadow-2xl transition-all animate-in slide-in-from-bottom-10 sm:rounded-[28px] sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+
+                <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border-strong sm:hidden" aria-hidden="true" />
 
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/5 px-6 py-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white font-sans">
-                        Adicionar Nota
+                <div className="flex items-center justify-between border-b border-border-subtle px-6 py-4">
+                    <h2 className="text-lg font-bold text-text-primary font-sans">
+                        Como quer adicionar?
                     </h2>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                        className="rounded-full p-2 text-text-tertiary hover:bg-surface-hover transition-colors"
+                        aria-label="Fechar"
                     >
                         <X size={20} />
                     </button>
@@ -34,28 +37,28 @@ export default function ScanMethodModal({ isOpen, onClose, onSelectGallery, onSe
                     {/* Camera Option (Active) */}
                     <button
                         onClick={onSelectCamera}
-                        className="group relative flex w-full items-center gap-4 rounded-xl border border-[#2b6cee]/30 bg-[#2b6cee]/10 p-4 text-left transition-all hover:bg-[#2b6cee]/20 active:scale-[0.98] ring-offset-2 focus:ring-2 focus:ring-[#2b6cee]"
+                        className="group relative flex w-full items-center gap-4 rounded-2xl border border-border-gold bg-gold-500/10 p-4 text-left transition-all hover:bg-gold-500/15 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gold-500/40"
                     >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#2b6cee] text-white shadow-lg shadow-[#2b6cee]/30 group-hover:scale-110 transition-transform">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold-500 text-on-gold shadow-lg shadow-gold-500/20 group-hover:scale-105 transition-transform">
                             <Camera size={24} />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-bold text-gray-900 dark:text-white">Escanear Câmera</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Capture sua nota ao vivo</p>
+                            <h3 className="font-bold text-text-primary">Usar a câmera</h3>
+                            <p className="text-sm text-text-tertiary">Fotografe agora</p>
                         </div>
                     </button>
 
                     {/* Gallery Option (Active) */}
                     <button
                         onClick={onSelectGallery}
-                        className="group relative flex w-full items-center gap-4 rounded-xl border border-[#81B29A]/30 bg-[#81B29A]/10 p-4 text-left transition-all hover:bg-[#81B29A]/20 active:scale-[0.98] ring-offset-2 focus:ring-2 focus:ring-[#81B29A]"
+                        className="group relative flex w-full items-center gap-4 rounded-2xl border border-border-subtle bg-surface-sunken p-4 text-left transition-all hover:border-border-gold hover:bg-surface-hover active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gold-500/40"
                     >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#81B29A] text-white shadow-lg shadow-[#81B29A]/30 group-hover:scale-110 transition-transform">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface-raised text-gold-500 group-hover:scale-105 transition-transform">
                             <ImageIcon size={24} />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-bold text-gray-900 dark:text-white">Galeria de Fotos</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Selecione uma foto do arquivo</p>
+                            <h3 className="font-bold text-text-primary">Escolher da galeria</h3>
+                            <p className="text-sm text-text-tertiary">Use uma foto que já existe</p>
                         </div>
                     </button>
 

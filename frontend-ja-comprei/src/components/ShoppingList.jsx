@@ -87,7 +87,7 @@ export default function ShoppingList({ ingredients, onGenerate, onAddIngredient,
             <main className="flex-1 px-4 pb-32 pt-2 md:px-8">
                 <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
                     {/* Helper Text */}
-                    <p className="mb-2 px-2 text-sm font-medium text-text-tertiary">
+                    <p className="mb-2 px-2 text-sm font-medium text-text-tertiary md:col-span-2 lg:col-span-3">
                         {items.length > 0 ? `${items.length} itens · ${items.filter(i => i.checked).length} selecionados` : 'Nenhum item na lista'}
                     </p>
 
@@ -136,7 +136,7 @@ export default function ShoppingList({ ingredients, onGenerate, onAddIngredient,
             </main>
 
             {/* Generate Button — pílula dourada fixa (safe-area) */}
-            <div className="fixed bottom-24 left-0 right-0 z-40 px-4 pt-4 bg-gradient-to-t from-surface-base via-surface-base/95 to-transparent">
+            <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-4 bg-gradient-to-t from-surface-base via-surface-base/95 to-transparent">
                 <div className="flex justify-center w-full max-w-7xl mx-auto pb-4">
                     <button
                         onClick={handleGenerateClick}
