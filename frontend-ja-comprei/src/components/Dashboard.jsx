@@ -69,7 +69,7 @@ export default function Dashboard({ onNavigate }) {
     const handleNavigate = (route) => onNavigate?.(route);
 
     return (
-        <div className="min-h-screen bg-surface-base text-text-primary lg:min-h-0">
+        <div className="min-h-screen min-w-0 max-w-full overflow-x-clip bg-surface-base text-text-primary lg:min-h-0">
             <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border-subtle bg-surface-base/90 px-5 py-4 backdrop-blur-xl lg:hidden">
                 <span className="flex size-10 items-center justify-center rounded-full bg-gold-500/15 text-gold-500"><User size={19} /></span>
                 <div>
@@ -78,7 +78,7 @@ export default function Dashboard({ onNavigate }) {
                 </div>
             </header>
 
-            <main className="mx-auto w-full max-w-[1480px] px-4 pb-28 pt-6 sm:px-7 lg:px-8 lg:pb-12 lg:pt-8 2xl:px-12">
+            <main className="mx-auto w-full min-w-0 max-w-[1480px] px-4 pb-28 pt-6 sm:px-7 lg:px-8 lg:pb-12 lg:pt-8 2xl:px-12">
                 <div className="mb-6 lg:mb-9">
                     <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-gold-500">
                         <Sparkles size={15} /> Sua cozinha, mais inteligente
@@ -147,37 +147,37 @@ export default function Dashboard({ onNavigate }) {
                     </aside>
                 </div>
 
-                <div className="mt-8 grid gap-8 xl:grid-cols-12">
-                    <section className="xl:col-span-5">
+                <div className="mt-8 grid min-w-0 gap-8 xl:grid-cols-12">
+                    <section className="min-w-0 xl:col-span-5">
                         <div className="mb-4 flex items-end justify-between">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.12em] text-text-tertiary">Outros caminhos</p>
                                 <h3 className="mt-1 text-xl font-extrabold tracking-[-0.025em]">Adicione do seu jeito</h3>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 xl:grid-cols-1 2xl:grid-cols-2">
+                        <div className="grid min-w-0 grid-cols-1 gap-3 min-[400px]:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
                             {quickMethods.map((method) => {
                                 const Icon = method.icon;
                                 return (
-                                    <button key={method.id} onClick={() => handleNavigate(method.route)} className="group rounded-[20px] border border-border-subtle bg-surface-raised p-4 text-left transition hover:-translate-y-0.5 hover:border-border-gold hover:bg-surface-hover sm:rounded-[22px] sm:p-5">
+                                    <button key={method.id} onClick={() => handleNavigate(method.route)} className="group min-w-0 max-w-full overflow-hidden rounded-[20px] border border-border-subtle bg-surface-raised p-4 text-left transition hover:-translate-y-0.5 hover:border-border-gold hover:bg-surface-hover sm:rounded-[22px] sm:p-5">
                                         <span className="flex size-11 items-center justify-center rounded-xl bg-gold-500/10 text-gold-500"><Icon size={21} /></span>
-                                        <h4 className="mt-4 text-sm font-extrabold">{method.label}</h4>
-                                        <p className="mt-1 text-xs leading-5 text-text-tertiary">{method.description}</p>
+                                        <h4 className="mt-4 break-words text-sm font-extrabold">{method.label}</h4>
+                                        <p className="mt-1 break-words text-xs leading-5 text-text-tertiary">{method.description}</p>
                                     </button>
                                 );
                             })}
                         </div>
                     </section>
 
-                    <section className="xl:col-span-7">
-                        <div className="mb-4 flex items-end justify-between">
-                            <div>
+                    <section className="min-w-0 xl:col-span-7">
+                        <div className="mb-4 flex min-w-0 items-end justify-between gap-3">
+                            <div className="min-w-0">
                                 <p className="text-xs font-bold uppercase tracking-[0.12em] text-text-tertiary">Retome de onde parou</p>
                                 <h3 className="mt-1 text-xl font-extrabold tracking-[-0.025em]">Atividade recente</h3>
                             </div>
-                            <History size={20} className="text-text-tertiary" />
+                            <History size={20} className="shrink-0 text-text-tertiary" />
                         </div>
-                        <div className="overflow-hidden rounded-[24px] border border-border-subtle bg-surface-raised">
+                        <div className="w-full min-w-0 max-w-full overflow-hidden rounded-[24px] border border-border-subtle bg-surface-raised">
                             {loading ? (
                                 <div className="space-y-3 p-5" aria-label="Carregando atividade">
                                     {[0, 1, 2].map((item) => <div key={item} className="h-14 animate-pulse rounded-xl bg-surface-hover" />)}
@@ -194,16 +194,16 @@ export default function Dashboard({ onNavigate }) {
                                         <button
                                             key={`${item.kind}-${item.id}`}
                                             onClick={() => handleNavigate(item.kind === 'list' ? `minhas-listas/${item.id}` : 'minhas-receitas')}
-                                            className="group flex w-full items-center gap-4 px-5 py-4 text-left transition hover:bg-surface-hover"
+                                            className="group flex w-full min-w-0 max-w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-surface-hover sm:gap-4 sm:px-5"
                                         >
                                             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface-sunken text-gold-500">
                                                 {item.kind === 'recipe' ? <BookOpen size={18} /> : <ShoppingBag size={18} />}
                                             </span>
                                             <span className="min-w-0 flex-1">
                                                 <span className="block truncate text-sm font-bold">{item.title || 'Sem título'}</span>
-                                                <span className="mt-0.5 block text-xs text-text-tertiary">{item.kind === 'recipe' ? 'Receita' : `${item.items?.length || 0} itens`} · {new Date(item.date).toLocaleDateString('pt-BR')}</span>
+                                                <span className="mt-0.5 block truncate text-xs text-text-tertiary">{item.kind === 'recipe' ? 'Receita' : `${item.items?.length || 0} itens`} · {new Date(item.date).toLocaleDateString('pt-BR')}</span>
                                             </span>
-                                            <ArrowRight size={17} className="text-text-tertiary transition group-hover:translate-x-1 group-hover:text-gold-400" />
+                                            <ArrowRight size={17} className="shrink-0 text-text-tertiary transition group-hover:translate-x-1 group-hover:text-gold-400" />
                                         </button>
                                     ))}
                                 </div>

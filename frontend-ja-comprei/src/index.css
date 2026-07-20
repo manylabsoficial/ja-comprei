@@ -8,19 +8,35 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
-  min-width: 320px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: clip;
   background: var(--color-surface-base);
 }
 
 #root {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: clip;
+}
+
+.app-page-content,
+.app-page-content > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 :focus-visible {

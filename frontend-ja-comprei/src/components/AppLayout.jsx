@@ -74,7 +74,7 @@ export default function AppLayout({ children }) {
     const initials = displayName.slice(0, 2).toUpperCase();
 
     return (
-        <div className="min-h-screen bg-surface-base text-text-primary">
+        <div className="min-h-screen min-w-0 max-w-full overflow-x-clip bg-surface-base text-text-primary">
             <aside className="fixed inset-y-0 left-0 z-50 hidden w-[280px] flex-col border-r border-border-subtle bg-surface-raised/95 px-4 py-5 backdrop-blur-xl lg:flex">
                 <button
                     onClick={() => navigate('/dashboard')}
@@ -155,7 +155,7 @@ export default function AppLayout({ children }) {
                 </button>
             </aside>
 
-            <div className="min-h-screen lg:pl-[280px]">
+            <div className="min-h-screen min-w-0 max-w-full lg:pl-[280px]">
                 <header className="sticky top-0 z-40 hidden h-20 items-center justify-between border-b border-border-subtle bg-surface-base/85 px-8 backdrop-blur-xl lg:flex 2xl:px-12">
                     <div>
                         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-gold-500">{meta.eyebrow}</p>
@@ -173,7 +173,7 @@ export default function AppLayout({ children }) {
                     </div>
                 </header>
 
-                <main className="app-page-content min-h-[calc(100vh-5rem)]">{children}</main>
+                <main className="app-page-content min-h-[calc(100vh-5rem)] min-w-0 max-w-full overflow-x-clip">{children}</main>
             </div>
 
             {!isFocusedMobileFlow && (
