@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     OPENROUTER_IMAGE_FALLBACK_QUALITY: str = "medium"
     OPENROUTER_IMAGE_FALLBACK_TIMEOUT_SECONDS: float = 20.0
 
+    # Multimodal model used to read receipt and pantry photos.
+    OPENROUTER_VISION_MODEL: str = "google/gemini-2.5-flash-lite"
+    OPENROUTER_VISION_TIMEOUT_SECONDS: float = 45.0
+
     # Supabase Settings
     SUPABASE_URL: str
     SUPABASE_KEY: str  # Anon Key (Opcional se formos usar só service role aqui, mas bom ter)

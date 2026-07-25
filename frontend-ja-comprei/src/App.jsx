@@ -25,6 +25,7 @@ import ConfirmationPage from './pages/ConfirmationPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ManualEntryPage from './pages/ManualEntryPage';
 import VoiceInputPage from './pages/VoiceInputPage';
+import CookWhatYouBoughtLanding from './pages/CookWhatYouBoughtLanding';
 import { api } from './services/api';
 import { checkCredits, deductCredit } from './services/recipeService';
 import AppLayout from './components/AppLayout';
@@ -88,7 +89,17 @@ export default function App() {
       }
     } catch (error) {
       console.error("Erro OCR:", error);
-      alert("Houve um erro ao ler a nota. Tente novamente com uma imagem mais clara.");
+      const errorMessage = error instanceof Error ? error.message : '';
+      const isConnectionError = /failed to fetch|network|conexão|connection/i.test(errorMessage);
+      const isImageError = /imagem|image|formato|arquivo|file type/i.test(errorMessage);
+
+      if (isConnectionError) {
+        alert("Não foi possível conectar ao serviço de leitura. Verifique se o backend está ligado e tente novamente.");
+      } else if (isImageError) {
+        alert("Não conseguimos identificar os itens nessa imagem. Tente outra foto, mantendo a nota inteira e bem iluminada.");
+      } else {
+        alert("O serviço de leitura está indisponível no momento. Tente novamente em alguns instantes.");
+      }
       navigate('/scanner');
     }
   };
@@ -206,6 +217,8 @@ export default function App() {
               onLogin={() => navigate('/login')}
             />
           } />
+
+          <Route path="/cozinhe-o-que-comprou" element={<CookWhatYouBoughtLanding />} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={

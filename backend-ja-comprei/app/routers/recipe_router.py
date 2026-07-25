@@ -158,6 +158,8 @@ async def analisar_nota(file: UploadFile = File(...)):
              except:
                  raise HTTPException(status_code=400, detail="Formato de arquivo não suportado.")
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Erro ao analisar nota: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=503, detail="receipt_processing_unavailable")

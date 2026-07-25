@@ -51,6 +51,7 @@ export default function AppLayout({ children }) {
         '/landing-classic',
         '/index2',
         '/v2',
+        '/cozinhe-o-que-comprou',
         '/login',
         '/confirmacao',
         '/auth/callback',

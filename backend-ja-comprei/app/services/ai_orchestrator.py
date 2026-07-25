@@ -1,6 +1,5 @@
 import logging
-import json
-from app.services.groq_service import groq_service
+from app.services.openrouter_vision_service import openrouter_vision_service
 
 logger = logging.getLogger(__name__)
 
@@ -12,23 +11,18 @@ class AIOrchestrator:
 
     async def process_receipt_image(self, image_buffer: bytes) -> dict:
         """
-        Flow:
-        1. Pollinations Vision -> Extract raw text from receipt image.
-        2. Groq -> Parse raw text into structured JSON ingredients.
+        Sends the image to the configured multimodal provider and returns
+        structured, validated ingredients.
         """
         try:
-            # Step 1: Encode Image
-            # Need to import utils here or at top
             from app.utils.image_utils import encode_image_to_base64
-            
-            # Assuming bytes come as JPEG or detecting mimetype would be better, but defaulting to jpeg for base64 header
+
             base64_image = encode_image_to_base64(image_buffer)
 
-            # Step 2: Vision (Groq Scout)
-            logger.info("Sending image to Groq Vision (Scout)...")
-            structured_data = groq_service.extract_text_vision(base64_image)
+            logger.info("Sending image to OpenRouter Vision...")
+            structured_data = openrouter_vision_service.extract_receipt(base64_image)
             
-            logger.info(f"Groq Extraction Result: {json.dumps(structured_data, ensure_ascii=False)}")
+            logger.info("Vision extraction completed with %s items", len(structured_data.get("ingredientes", [])))
             return structured_data
 
         except Exception as e:
