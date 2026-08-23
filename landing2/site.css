@@ -1,0 +1,422 @@
+/* site.css — Modern Cinematic Split Landing Page with Transparent Video & Dynamic Slate Backdrop */
+
+:root {
+  --bg: #090a0f;
+  --bg-card: rgba(18, 20, 29, 0.65);
+  --accent: #e8b44a; /* Golden amber */
+  --accent-cyan: #39e0ff; /* Scanner cyan */
+  --text: #f3ead9;
+  --muted: rgba(243, 234, 217, 0.65);
+  --hairline: rgba(255, 255, 255, 0.12);
+  --serif: "Times New Roman", Georgia, serif;
+  --sans: "Helvetica Neue", Inter, system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scrollbar-width: none;
+  background-color: var(--bg);
+}
+
+html::-webkit-scrollbar { display: none; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Fundo Híbrido: Ardósia + Spotlights + Grain + Vignette */
+.background-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.slate-texture {
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(25, 30, 42, 0.4) 0%, rgba(9, 10, 15, 0.95) 100%),
+    linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+}
+
+.spotlight {
+  position: absolute;
+  top: 50%;
+  right: 25%;
+  transform: translate(50%, -50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 180, 74, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+  transition: background 1s ease, transform 1s ease;
+  filter: blur(40px);
+}
+
+.spotlight.cyan-glow {
+  background: radial-gradient(circle, rgba(57, 224, 255, 0.22) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.spotlight.golden-glow {
+  background: radial-gradient(circle, rgba(232, 180, 74, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 300px 80px rgba(0, 0, 0, 0.88);
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Layout Split */
+.split-container {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* Coluna de Texto (Esquerda) */
+.col-text {
+  padding: 0 4vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.chapter {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  padding: 8vh 0;
+  position: relative;
+}
+
+.chapter-inner {
+  max-width: 620px;
+  will-change: transform, opacity;
+}
+
+.kicker {
+  font-size: 12px;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.chapter h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.05;
+  font-size: clamp(42px, 5vw, 76px);
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+}
+
+.chapter h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.1;
+  font-size: clamp(32px, 3.8vw, 56px);
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+.chapter p.lead {
+  font-size: clamp(16px, 1.4vw, 20px);
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+/* Badges e Cards */
+.badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.badge {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--hairline);
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* Specifications Grid */
+.specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.spec-card {
+  background: var(--bg-card);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.spec-card .k {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.spec-card .v {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* Botões */
+.btn {
+  display: inline-block;
+  padding: 16px 36px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #000;
+  border: 1px solid var(--accent);
+  box-shadow: 0 10px 30px rgba(232, 180, 74, 0.25);
+}
+
+.btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(232, 180, 74, 0.4);
+  background: #f1c365;
+}
+
+.btn.large {
+  padding: 20px 48px;
+  font-size: 14px;
+}
+
+/* Coluna de Vídeo Fixa (Direita) */
+.col-video {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.video-wrapper {
+  width: 100%;
+  max-width: 480px;
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.transparent-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 25px rgba(232, 180, 74, 0.15));
+  will-change: transform;
+}
+
+/* Navigation & UI Extras */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  padding: 26px 4vw;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.hud {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 70px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.hud .rail {
+  position: relative;
+  width: 2px;
+  height: 38vh;
+  background: var(--hairline);
+  overflow: hidden;
+}
+
+.hud .rail #hud-bar {
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  background: var(--accent);
+  transform: scaleY(0);
+}
+
+.hud .label, .hud #hud-value {
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.cta-float {
+  position: fixed;
+  right: 28px;
+  bottom: 26px;
+  z-index: 5;
+  padding: 14px 28px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: rgba(9, 10, 15, 0.65);
+  backdrop-filter: blur(8px);
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.cta-float:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+.scrollcue {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
+  animation: bob 2.4s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.4; }
+  50% { transform: translate(-50%, 8px); opacity: 1; }
+}
+
+/* Preloader Veil */
+#veil {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease;
+}
+
+#veil.gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#veil .mark {
+  font-family: var(--serif);
+  font-size: 36px;
+  letter-spacing: 0.1em;
+}
+
+#veil .bar {
+  position: absolute;
+  bottom: 20%;
+  width: 160px;
+  height: 2px;
+  background: var(--hairline);
+  overflow: hidden;
+}
+
+#veil .bar i {
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--accent);
+  animation: slide 1.1s ease-in-out infinite;
+}
+
+@keyframes slide {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+/* Media Queries Responsivas (Mobile & Tablet) */
+@media (max-width: 900px) {
+  .split-container {
+    grid-template-columns: 1fr;
+  }
+  .col-video {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    opacity: 0.35;
+    z-index: 1;
+  }
+  .col-text {
+    position: relative;
+    z-index: 2;
+    padding: 0 6vw;
+  }
+  .specs-grid {
+    grid-template-columns: 1fr;
+  }
+}

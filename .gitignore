@@ -25,3 +25,8 @@ dist-ssr
 .env
 backend-ja-comprei/.env
 __pycache__/
+
+# Large media exports
+*.mov
+*.mp4
+*.webm
